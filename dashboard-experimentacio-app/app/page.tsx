@@ -1,12 +1,16 @@
-import { Button, HStack } from "@chakra-ui/react"
+"use client";
 
-const Demo = () => {
+import { Heading, Text } from "@chakra-ui/react";
+
+export default function HomePage() {
   return (
-    <HStack>
-      <Button>Click me</Button>
-      <Button>Click me</Button>
-    </HStack>
-  )
+    <>
+      <Heading size="lg" mb={4}>
+        Página principal
+      </Heading>
+      <Text color="gray.600">
+        Aquí puedes mostrar el resumen inicial del dashboard.
+      </Text>
+    </>
+  );
 }
-
-export default Demo
