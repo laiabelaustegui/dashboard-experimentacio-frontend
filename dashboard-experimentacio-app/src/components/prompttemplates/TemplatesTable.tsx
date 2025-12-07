@@ -1,37 +1,68 @@
-import { For, Stack, Table } from "@chakra-ui/react"
+"use client";
 
+import { Center, Spinner, Text, IconButton, Table } from "@chakra-ui/react";
+import { IoPencil, IoTrash } from "react-icons/io5";
+import { usePromptTemplates } from "./usePromptTemplates";
 
 export const TemplatesTable = () => {
-  return (
-    <Stack gap="10">
-      <For each={["line", "outline"]}>
-        {(variant) => (
-          <Table.Root key={variant} size="sm" variant={variant}>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>Name</Table.ColumnHeader>
-                <Table.ColumnHeader>Creation Date</Table.ColumnHeader>
-                <Table.ColumnHeader textAlign="end">Actions</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {items.map((item) => (
-                <Table.Row key={item.id}>
-                  <Table.Cell>{item.name}</Table.Cell>
-                  <Table.Cell>{item.creationDate}</Table.Cell>
-                  <Table.Cell textAlign="end">{/* Actions go here */}</Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
-        )}      
-        </For>
-    </Stack>
-  )
-}
+  const { templates, isLoading, isError, error } = usePromptTemplates();
 
-const items = [
-  { id: 1, name: "Prompt Template 1", creationDate: "2023-01-01" },
-  { id: 2, name: "Prompt Template 2", creationDate: "2023-02-15" },
-  { id: 3, name: "Prompt Template 3", creationDate: "2023-03-10" },
-]
+  if (isLoading) {
+    return (
+      <Center py={8}>
+        <Spinner />
+      </Center>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Center py={8}>
+        <Text color="red.500">
+          Error: {error?.message ?? "Unknown error"}
+        </Text>
+      </Center>
+    );
+  }
+
+  if (templates.length === 0) {
+    return (
+      <Center py={8}>
+        <Text color="gray.500">No prompt templates found.</Text>
+      </Center>
+    );
+  }
+
+  return (
+    <Table.Root size="md" variant="outline" interactive>
+      <Table.Header>
+        <Table.Row>
+          <Table.ColumnHeader>Name</Table.ColumnHeader>
+          <Table.ColumnHeader>Creation Date</Table.ColumnHeader>
+          <Table.ColumnHeader textAlign="end">Actions</Table.ColumnHeader>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        {templates.map((template) => (
+          <Table.Row key={template.id}>
+            <Table.Cell>{template.name}</Table.Cell>
+            <Table.Cell>{"12-01-2023"}</Table.Cell>
+            <Table.Cell textAlign="end">
+              <IconButton aria-label="Edit" size="sm" variant="ghost">
+                <IoPencil />
+              </IconButton>
+              <IconButton
+                aria-label="Delete"
+                size="sm"
+                variant="ghost"
+                colorScheme="red"
+              >
+                <IoTrash />
+              </IconButton>
+            </Table.Cell>
+          </Table.Row>
+        ))}
+      </Table.Body>
+    </Table.Root>
+  );
+};
