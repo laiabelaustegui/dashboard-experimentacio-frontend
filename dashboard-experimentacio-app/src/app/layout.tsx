@@ -10,13 +10,13 @@ export const metadata: Metadata = {
   description: "Dashboard for experimenting with LLM-powered mobile app recommender systems",
 };
 
-export default function RootLayout({ 
+export default function RootLayout({
   children,
- }: Readonly<{ 
-  children: React.ReactNode 
+}: Readonly<{
+  children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning>
+    <html lang="en" className="light" suppressHydrationWarning>
       <body>
         <Providers>
           <Box>
@@ -31,3 +31,4 @@ export default function RootLayout({
     </html>
   );
 }
+

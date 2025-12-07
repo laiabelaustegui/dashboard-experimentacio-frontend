@@ -46,7 +46,7 @@ export const TemplatesTable = () => {
         {templates.map((template) => (
           <Table.Row key={template.id}>
             <Table.Cell>{template.name}</Table.Cell>
-            <Table.Cell>{"12-01-2023"}</Table.Cell>
+            <Table.Cell>{template.creation_date.slice(0, 10)}</Table.Cell>
             <Table.Cell textAlign="end">
               <IconButton aria-label="Edit" size="sm" variant="ghost">
                 <IoPencil />
