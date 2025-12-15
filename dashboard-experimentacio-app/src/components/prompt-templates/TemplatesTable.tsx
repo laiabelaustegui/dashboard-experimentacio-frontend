@@ -5,7 +5,7 @@ import { IoPencil, IoTrash } from "react-icons/io5";
 import { usePromptTemplates } from "./usePromptTemplates";
 
 export const TemplatesTable = () => {
-  const { templates, isLoading, isError, error } = usePromptTemplates();
+  const { templates, isLoading, isError, error, deleteTemplate } = usePromptTemplates();
 
   if (isLoading) {
     return (
@@ -56,6 +56,7 @@ export const TemplatesTable = () => {
                 size="sm"
                 variant="ghost"
                 colorScheme="red"
+                onClick={() => deleteTemplate(template.id)}
               >
                 <IoTrash />
               </IconButton>

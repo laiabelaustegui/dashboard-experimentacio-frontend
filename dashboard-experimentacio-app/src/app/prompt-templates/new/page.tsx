@@ -1,5 +1,5 @@
 import { Flex, Heading } from "@chakra-ui/react"
-import { TemplateForm } from "@/components/prompttemplates/TemplateForm";
+import { TemplateForm } from "@/components/prompt-templates/TemplateForm";
 
 export default function NewPromptTemplatePage() {
   return (

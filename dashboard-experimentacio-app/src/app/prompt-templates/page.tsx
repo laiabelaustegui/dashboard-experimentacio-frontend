@@ -1,4 +1,4 @@
-import { TemplatesTable } from "@/components/prompttemplates/TemplatesTable";
+import { TemplatesTable } from "@/components/prompt-templates/TemplatesTable";
 import { Button, Flex, Heading, Link } from "@chakra-ui/react";
 
 export default function PromptTemplatesPage() {

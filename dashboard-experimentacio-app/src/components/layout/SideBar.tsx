@@ -35,7 +35,7 @@ export default function SideBar() {
       <Link expanded={isOpen} href="/models" icon={<AiOutlineRobot />} title="Models" />
       <Link
         expanded={isOpen}
-        href="/prompttemplates"
+        href="/prompt-templates"
         icon={<AiOutlineFile />}
         title="Prompt Templates"
       />
