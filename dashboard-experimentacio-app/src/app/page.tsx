@@ -17,8 +17,8 @@ export default function HomePage() {
         <QuickActionCard
           title="Prompt Templates"
           actions={[
-            { href: "/prompttemplates/new", label: "Create template", props: { colorScheme: "teal" } },
-            { href: "/prompttemplates", label: "See templates", props: { variant: "outline" } },
+            { href: "/prompt-templates/new", label: "Create template", props: { colorScheme: "teal" } },
+            { href: "/prompt-templates", label: "See templates", props: { variant: "outline" } },
           ]}
         />
         <QuickActionCard

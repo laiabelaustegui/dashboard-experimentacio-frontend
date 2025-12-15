@@ -12,7 +12,7 @@ export default function PromptTemplatesPage() {
         </Heading>
         <Button
           as={Link}
-          href="/prompttemplates/new"
+          href="/prompt-templates/new"
           colorScheme="teal"
           size="sm"
         >
