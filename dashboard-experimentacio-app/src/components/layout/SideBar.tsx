@@ -32,7 +32,7 @@ export default function SideBar() {
       </Flex>
 
       <Link expanded={isOpen} href="/" icon={<IoSpeedometerOutline />} title="Dashboard" />
-      <Link expanded={isOpen} href="/models" icon={<AiOutlineRobot />} title="Models" />
+      <Link expanded={isOpen} href="/llms" icon={<AiOutlineRobot />} title="Models" />
       <Link
         expanded={isOpen}
         href="/prompt-templates"

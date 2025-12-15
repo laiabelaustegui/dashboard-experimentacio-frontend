@@ -10,8 +10,8 @@ export default function HomePage() {
         <QuickActionCard
           title="Large Language Models (LLMs)"
           actions={[
-            { href: "/models/new", label: "Add new model", props: { colorScheme: "teal" } },
-            { href: "/models", label: "See models", props: { variant: "outline" } },
+            { href: "/llms/new", label: "Add new model", props: { colorScheme: "teal" } },
+            { href: "/llms", label: "See models", props: { variant: "outline" } },
           ]}
         />
         <QuickActionCard
