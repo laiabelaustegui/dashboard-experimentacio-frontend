@@ -1,4 +1,4 @@
-import { LlmsTable } from "@/components/llms/LlmsTable";
+import { LlmsTabs } from "@/components/llms/LlmsTabs";
 import { CreateNewButton } from "@/components/ui/button";
 import { Flex, Heading } from "@chakra-ui/react";
 
@@ -14,7 +14,7 @@ export default function ModelsPage() {
           label="Add Model"
         />
       </Flex>
-      <LlmsTable />
+      <LlmsTabs />
     </Flex>
   );
 }
