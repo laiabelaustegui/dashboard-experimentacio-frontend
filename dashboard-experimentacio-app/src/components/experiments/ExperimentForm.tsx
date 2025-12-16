@@ -1,0 +1,235 @@
+// components/experiments/CreateExperimentForm.tsx
+"use client";
+
+import {
+  Box,
+  Button,
+  Field,
+  Fieldset,
+  Input,
+  NativeSelect,
+  NumberInput,
+  Stack,
+  Text,
+  Flex,
+  Combobox,
+  useFilter,
+  useListCollection,
+  Badge,
+} from "@chakra-ui/react";
+import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import type { CreateExperimentDto } from "@/model/experiment";
+import { useConfiguredModels } from "@/components/configured-models/useConfiguredModels";
+import { usePromptTemplates } from "@/components/prompt-templates/usePromptTemplates";
+import apiProvider from "@/providers/api";
+
+export const ExperimentForm = () => {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [promptTemplateId, setPromptTemplateId] = useState<number | "">("");
+  const [selectedModelIds, setSelectedModelIds] = useState<number[]>([]);
+  const [numRuns, setNumRuns] = useState("1");
+
+  const { configuredModels, isLoading: loadingModels } = useConfiguredModels();
+  const { templates, isLoading: loadingPrompts } = usePromptTemplates();
+
+  // items para el combobox
+  const items = configuredModels.map((m) => ({
+    label: m.short_name,
+    value: String(m.id),
+  }));
+
+  const { contains } = useFilter({ sensitivity: "base" });
+
+  const { collection } = useListCollection({
+    initialItems: items,
+    itemToString: (item) => item.label,
+    itemToValue: (item) => item.value,
+    filter: contains,
+  });
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const dto: CreateExperimentDto = {
+      name,
+      prompt_template: Number(promptTemplateId),
+      configurated_models: selectedModelIds,
+      num_runs: Number(numRuns),
+    };
+
+    console.log("Submitting experiment:", dto);
+
+    try {
+      await apiProvider.post({
+        path: "/experiments/",
+        body: dto,
+      });
+
+      router.push("/experiments");
+    } catch (error) {
+      console.error("Error creating experiment", error);
+    }
+  };
+
+  // items seleccionados (para pintarlos como chips)
+  const selectedItems = items.filter((it) =>
+    selectedModelIds.includes(Number(it.value)),
+  );
+
+  return (
+    <Box
+      as="form"
+      onSubmit={handleSubmit}
+      maxW="5xl"
+      mt={4}
+      p={6}
+      borderWidth="1px"
+      borderRadius="lg"
+      bg="white"
+    >
+      <Text mb={6} color="gray.600">
+        Please complete the following information to create a new experiment.
+      </Text>
+
+      <Flex direction={{ base: "column", md: "row" }} gap={8} align="flex-start">
+        {/* Fieldset: detalles del experimento */}
+        <Fieldset.Root size="lg" flex="1" colorPalette="teal">
+          <Stack mb={4}>
+            <Fieldset.Legend>Experiment details</Fieldset.Legend>
+            <Fieldset.HelperText>
+              Name, configurated models and prompt template.
+            </Fieldset.HelperText>
+          </Stack>
+
+          <Fieldset.Content>
+            {/* Name */}
+            <Field.Root>
+              <Field.Label>Name</Field.Label>
+              <Input
+                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Experiment name"
+                required
+              />
+            </Field.Root>
+
+            {/* Models (Combobox multiple) */}
+            <Field.Root mt={4}>
+              <Field.Label>Configurated Models</Field.Label>
+              <Field.HelperText>
+                Select the configurated models for the experiment
+              </Field.HelperText>
+
+              {/* chips con los modelos seleccionados */}
+              {selectedItems.length > 0 && (
+                <Stack direction="row" flexWrap="wrap" gap={2} mt={2} mb={2}>
+                  {selectedItems.map((item) => (
+                    <Badge
+                      key={item.value}
+                      colorScheme="teal"
+                      px={2}
+                      py={1}
+                      borderRadius="md"
+                    >
+                      {item.label}
+                    </Badge>
+                  ))}
+                </Stack>
+              )}
+
+              <Combobox.Root
+                multiple
+                collection={collection}
+                value={selectedModelIds.map(String)}
+                onValueChange={(details) => {
+                  const ids = details.value.map((v) => Number(v));
+                  setSelectedModelIds(ids);
+                }}
+                openOnClick
+                placeholder="Select models..."
+                disabled={loadingModels}
+              >
+                <Combobox.Control>
+                  <Combobox.Input />
+                  <Combobox.IndicatorGroup>
+                    <Combobox.ClearTrigger />
+                    <Combobox.Trigger />
+                  </Combobox.IndicatorGroup>
+                </Combobox.Control>
+
+                <Combobox.Positioner>
+                  <Combobox.Content>
+                    <Combobox.Empty>No models found</Combobox.Empty>
+                    {collection.items.map((item) => (
+                      <Combobox.Item key={item.value} item={item}>
+                        {item.label}
+                      </Combobox.Item>
+                    ))}
+                  </Combobox.Content>
+                </Combobox.Positioner>
+              </Combobox.Root>
+            </Field.Root>
+
+            {/* Prompt template */}
+            <Field.Root mt={4}>
+              <Field.Label>Prompt template</Field.Label>
+              <NativeSelect.Root disabled={loadingPrompts}>
+                <NativeSelect.Field
+                  name="prompt_template"
+                  value={promptTemplateId === "" ? "" : String(promptTemplateId)}
+                  onChange={(e) =>
+                    setPromptTemplateId(
+                      e.target.value === "" ? "" : Number(e.target.value),
+                    )
+                  }
+                >
+                  <option value="">Select prompt template</option>
+                  {templates.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+            </Field.Root>
+          </Fieldset.Content>
+        </Fieldset.Root>
+
+        {/* Fieldset: parámetros */}
+        <Fieldset.Root size="lg" flex="1" colorPalette="teal">
+          <Stack mb={4}>
+            <Fieldset.Legend>Parameters</Fieldset.Legend>
+            <Fieldset.HelperText>Configure number of runs.</Fieldset.HelperText>
+          </Stack>
+
+          <Fieldset.Content>
+            <Field.Root mt={4}>
+              <Field.Label>Number of runs</Field.Label>
+              <NumberInput.Root
+                min={1}
+                max={100}
+                value={numRuns}
+                onValueChange={(details) => setNumRuns(details.value)}
+              >
+                <NumberInput.Input name="num_runs" />
+              </NumberInput.Root>
+            </Field.Root>
+          </Fieldset.Content>
+        </Fieldset.Root>
+      </Flex>
+
+      <Flex justify="flex-end" mt={8} gap={3}>
+        <Button type="button" variant="outline">
+          Cancel
+        </Button>
+        <Button type="submit" colorScheme="teal">
+          Execute
+        </Button>
+      </Flex>
+    </Box>
+  );
+};

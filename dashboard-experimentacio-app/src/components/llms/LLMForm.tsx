@@ -13,11 +13,9 @@ import {
 } from "@chakra-ui/react";
 
 import apiProvider from "@/providers/api";
-import type { CreatePromptTemplateDto } from "@/model/promptTemplate";
 import { CreateLLMDto } from "@/model/LLM";
 
 export function LLMForm() {
-  const [schemaJson, setSchemaJson] = useState("");
   const router = useRouter();
 
   const handleCancel = () => {

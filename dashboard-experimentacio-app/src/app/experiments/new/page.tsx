@@ -1,5 +1,6 @@
 
 import { Flex, Heading } from "@chakra-ui/react";
+import { ExperimentForm } from "@/components/experiments/ExperimentForm";
 
 export default function NewExperimentPage() {
   return (
@@ -9,6 +10,7 @@ export default function NewExperimentPage() {
             Create Experiment
           </Heading>
         </Flex>
+        <ExperimentForm />
       </Flex>
   );  
 }
