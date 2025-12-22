@@ -1,3 +1,4 @@
+import { ExperimentsTable } from "@/components/experiments/ExperimentsTable";
 import { CreateNewButton } from "@/components/ui/button";
 import { Flex, Heading } from "@chakra-ui/react";
 
@@ -13,6 +14,7 @@ export default function ExperimentsPage() {
             label="New Experiment"
           />
         </Flex>
+        <ExperimentsTable />
       </Flex>
   );  
 }

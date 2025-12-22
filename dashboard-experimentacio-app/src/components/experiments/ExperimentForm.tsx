@@ -17,7 +17,7 @@ import {
   useListCollection,
   Badge,
 } from "@chakra-ui/react";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { CreateExperimentDto } from "@/model/experiment";
 import { useConfiguredModels } from "@/components/configured-models/useConfiguredModels";
@@ -28,16 +28,16 @@ export const ExperimentForm = () => {
   const router = useRouter();
   const [name, setName] = useState("");
   const [promptTemplateId, setPromptTemplateId] = useState<number | "">("");
-  const [selectedModelIds, setSelectedModelIds] = useState<number[]>([]);
+  const [selectedModelIds, setSelectedModelIds] = useState<string[]>([]);
   const [numRuns, setNumRuns] = useState("1");
 
   const { configuredModels, isLoading: loadingModels } = useConfiguredModels();
   const { templates, isLoading: loadingPrompts } = usePromptTemplates();
 
-  // items para el combobox
-  const items = configuredModels.map((m) => ({
-    label: m.short_name,
-    value: String(m.id),
+ // 2) Colección
+  const items = configuredModels.map((model) => ({
+    label: model.short_name,
+    value: String(model.id),
   }));
 
   const { contains } = useFilter({ sensitivity: "base" });
@@ -55,7 +55,7 @@ export const ExperimentForm = () => {
     const dto: CreateExperimentDto = {
       name,
       prompt_template: Number(promptTemplateId),
-      configurated_models: selectedModelIds,
+      configurated_models: selectedModelIds.map(Number),
       num_runs: Number(numRuns),
     };
 
@@ -73,10 +73,11 @@ export const ExperimentForm = () => {
     }
   };
 
-  // items seleccionados (para pintarlos como chips)
+  /// 3) selectedItems para los chips
   const selectedItems = items.filter((it) =>
-    selectedModelIds.includes(Number(it.value)),
+    selectedModelIds.includes(it.value),
   );
+
 
   return (
     <Box
@@ -143,14 +144,19 @@ export const ExperimentForm = () => {
               <Combobox.Root
                 multiple
                 collection={collection}
-                value={selectedModelIds.map(String)}
+                value={selectedModelIds}
                 onValueChange={(details) => {
-                  const ids = details.value.map((v) => Number(v));
-                  setSelectedModelIds(ids);
+                  setSelectedModelIds(details.value);
                 }}
                 openOnClick
-                placeholder="Select models..."
-                disabled={loadingModels}
+                placeholder={
+                  loadingModels
+                    ? "Loading models..."
+                    : configuredModels.length === 0
+                    ? "No configurated models available"
+                    : "Select configurated models"
+                }
+                disabled={loadingModels || configuredModels.length === 0}
               >
                 <Combobox.Control>
                   <Combobox.Input />
@@ -162,8 +168,7 @@ export const ExperimentForm = () => {
 
                 <Combobox.Positioner>
                   <Combobox.Content>
-                    <Combobox.Empty>No models found</Combobox.Empty>
-                    {collection.items.map((item) => (
+                    {items.map((item) => (
                       <Combobox.Item key={item.value} item={item}>
                         {item.label}
                       </Combobox.Item>
