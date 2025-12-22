@@ -3,9 +3,11 @@
 import { Center, Spinner, Text, IconButton, Table } from "@chakra-ui/react";
 import { IoPencil, IoTrash } from "react-icons/io5";
 import { usePromptTemplates } from "./usePromptTemplates";
+import { useRouter } from "next/navigation";
 
 export const TemplatesTable = () => {
-  const { templates, isLoading, isError, error } = usePromptTemplates();
+  const router = useRouter();
+  const { templates, isLoading, isError, error, deleteTemplate } = usePromptTemplates();
 
   if (isLoading) {
     return (
@@ -44,7 +46,11 @@ export const TemplatesTable = () => {
       </Table.Header>
       <Table.Body>
         {templates.map((template) => (
-          <Table.Row key={template.id}>
+          <Table.Row key={template.id}
+              cursor="pointer"
+              _hover={{bg: "gray.50"}}
+              onClick={() => router.push(`/prompt-templates/${template.id}`)}
+          >
             <Table.Cell>{template.name}</Table.Cell>
             <Table.Cell>{template.creation_date.slice(0, 10)}</Table.Cell>
             <Table.Cell textAlign="end">
@@ -56,6 +62,7 @@ export const TemplatesTable = () => {
                 size="sm"
                 variant="ghost"
                 colorScheme="red"
+                onClick={() => deleteTemplate(template.id)}
               >
                 <IoTrash />
               </IconButton>

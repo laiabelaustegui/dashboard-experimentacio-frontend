@@ -20,7 +20,7 @@ export function TemplateForm() {
   const router = useRouter();
 
   const handleCancel = () => {
-    router.push("/prompttemplates");
+    router.push("/prompt-templates");
   };
 
   const handleSchemaFileChange = async (
@@ -65,11 +65,11 @@ export function TemplateForm() {
 
     try {
       await apiProvider.post({
-        path: "/prompttemplates/",
+        path: "/prompt-templates/",
         body: dto,
       });
 
-      router.push("/prompttemplates");
+      router.push("/prompt-templates");
     } catch (error) {
       console.error("Error creating template", error);
       // aquí puedes poner un toast o notificación

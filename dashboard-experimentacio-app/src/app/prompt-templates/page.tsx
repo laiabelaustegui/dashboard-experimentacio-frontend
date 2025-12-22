@@ -1,5 +1,6 @@
-import { TemplatesTable } from "@/components/prompttemplates/TemplatesTable";
-import { Button, Flex, Heading, Link } from "@chakra-ui/react";
+import { TemplatesTable } from "@/components/prompt-templates/TemplatesTable";
+import { CreateNewButton } from "@/components/ui/button";
+import { Flex, Heading } from "@chakra-ui/react";
 
 export default function PromptTemplatesPage() {
   return (
@@ -10,14 +11,10 @@ export default function PromptTemplatesPage() {
         <Heading as="h1" size="lg">
           Prompt Templates
         </Heading>
-        <Button
-          as={Link}
-          href="/prompttemplates/new"
-          colorScheme="teal"
-          size="sm"
-        >
-          New Prompt Template
-        </Button>
+        <CreateNewButton
+          href="/prompt-templates/new"
+          label="New Prompt Template"
+        />
       </Flex>
       <TemplatesTable />
     </Flex>
