@@ -1,13 +1,13 @@
-import { Flex, Heading } from "@chakra-ui/react";
+import TemplateDetails from "@/components/prompt-templates/TemplateDetails";
 
-export default function PromptTemplateDetailsPage() {
-  return (
-      <Flex direction="column" gap={4} p={4} w="full">
-        <Flex justify="space-between" align="center">
-          <Heading as="h1" size="lg">
-            Prompt Template Details
-          </Heading>
-        </Flex>
-      </Flex>
-  );  
+export default async function PromptTemplateDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+
+  const {id} = await params;
+  const parsedId = Number(id);
+
+  return <TemplateDetails id={parsedId} />;
 }
