@@ -1,11 +1,12 @@
 "use client";
 
-import { Flex, SimpleGrid } from "@chakra-ui/react";
+import { Flex, SimpleGrid, Text } from "@chakra-ui/react";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
+import { ExperimentsTable } from "@/components/experiments/ExperimentsTable";
 
 export default function HomePage() {
   return (
-    <Flex direction="column" gap={8}>
+    <Flex direction="column" gap={8} p={4} w="full">
       <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
         <QuickActionCard
           title="Large Language Models (LLMs)"
@@ -29,6 +30,8 @@ export default function HomePage() {
           ]}
         />
       </SimpleGrid>
+      <Text> Recent Experiments</Text>
+      <ExperimentsTable />
     </Flex>
   );
 }

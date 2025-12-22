@@ -1,13 +1,14 @@
-import { Flex, Heading } from "@chakra-ui/react";
+import ExperimentDetails from "@/components/experiments/ExperimentDetails";
 
-export default function ExperimentResultPage() {
-  return (
-      <Flex direction="column" gap={4} p={4} w="full">
-        <Flex justify="space-between" align="center">
-          <Heading as="h1" size="lg">
-            Results for the Experiment
-          </Heading>
-        </Flex>
-      </Flex>
-  );  
+
+export default async function ExperimentDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+
+  const {id} = await params;
+  const parsedId = Number(id);
+
+  return <ExperimentDetails id={parsedId} />;
 }
