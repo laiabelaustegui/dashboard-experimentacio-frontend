@@ -179,9 +179,9 @@ export default function ExperimentDetails({ id }: { id: number }) {
                 bg="gray.50"
             >
                 <Text fontSize="sm" color="gray.500">
-                Configured model id
+                Configured model used for the run
                 </Text>
-                <Text fontWeight="semibold">{currentRun.configured_model}</Text>
+                <Text fontWeight="semibold">{currentRun.configured_model.short_name}</Text>
             </Box>
             </Flex>
 

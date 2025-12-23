@@ -1,14 +1,17 @@
+import { ConfiguredModel } from "./configuredModel";
+
 export type CreateExperimentDto = {
     name: string;
     prompt_template: number; // PromptTemplate ID
-    configurated_models: number [];   // Array of ConfiguredModel IDs
+    configured_models: number [];   // Array of ConfiguredModel IDs
     num_runs: number;
 }
 
 export type Experiment = {
     id: number;
     prompt_template: number; // PromptTemplate ID
-    configurated_models: number [];   // Array of ConfiguredModel IDs
+    configured_models: number [];   // Array of ConfiguredModel IDs
+    configured_models_detail?: ConfiguredModel []; // Optional detailed info
     name: string;
     num_runs: number;
     execution_date: string; // ISO date string
@@ -31,7 +34,7 @@ export type RankingCriterion = {
 export type ExperimentRun = {
   id: number;
   elapsed_time: number;
-  configured_model: number; // ID del configured model
+  configured_model: ConfiguredModel; 
   mobile_app_rankings: MobileAppRanking[];
   ranking_criteria: RankingCriterion[];
 };
