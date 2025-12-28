@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import { Experiment } from "@/model/experiment";
+import { Experiment } from "@/models/experiment";
 
 export function useExperiment(id: number) {
   const { data, error, isLoading } = useSWR<Experiment>(

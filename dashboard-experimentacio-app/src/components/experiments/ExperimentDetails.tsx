@@ -1,13 +1,14 @@
 "use client";
 
 import {
+  Box,
+  Button,
+  Card,
   Flex,
   Heading,
-  Text,
-  Box,
   Select,
+  Text,
   createListCollection,
-  Button,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useExperiment } from "./useExperiment";
@@ -36,7 +37,7 @@ export default function ExperimentDetails({ id }: { id: number }) {
     if (isLoading || !experiment) {
         return (
         <Flex direction="column" gap={4} p={4} w="full">
-            <Text color="gray.600">Loading experiment...</Text>
+            <Text color="fg.muted">Loading experiment...</Text>
         </Flex>
         );
     }
@@ -44,7 +45,7 @@ export default function ExperimentDetails({ id }: { id: number }) {
     if (isError) {
         return (
         <Flex direction="column" gap={4} p={4} w="full">
-            <Text color="red.500">
+            <Text color="fg.error">
             Error loading experiment: {error?.message ?? "Unknown error"}
             </Text>
         </Flex>
@@ -59,7 +60,7 @@ export default function ExperimentDetails({ id }: { id: number }) {
         </Heading>
 
         <Button
-          colorScheme="teal"
+          colorPalette="teal"
           onClick={() => {
             // aquí luego disparas la lógica de generación de gráficos
             // por ahora, por ejemplo:
@@ -72,26 +73,32 @@ export default function ExperimentDetails({ id }: { id: number }) {
 
       {/* tarjetas de resumen */}
       <Flex gap={4} wrap="wrap">
-        <Box flex="1" minW="200px" p={4} borderWidth="1px" borderRadius="md" bg="gray.50">
-          <Text fontSize="sm" color="gray.500">
-            Status
-          </Text>
-          <Text fontWeight="semibold">{experiment.status}</Text>
-        </Box>
+        <Card.Root flex="1" minW="200px">
+          <Card.Body>
+            <Text textStyle="sm" color="fg.muted">
+              Status
+            </Text>
+            <Text fontWeight="semibold">{experiment.status}</Text>
+          </Card.Body>
+        </Card.Root>
 
-        <Box flex="1" minW="200px" p={4} borderWidth="1px" borderRadius="md" bg="gray.50">
-          <Text fontSize="sm" color="gray.500">
-            Number of runs
-          </Text>
-          <Text fontWeight="semibold">{experiment.num_runs}</Text>
-        </Box>
+        <Card.Root flex="1" minW="200px">
+          <Card.Body>
+            <Text textStyle="sm" color="fg.muted">
+              Number of runs
+            </Text>
+            <Text fontWeight="semibold">{experiment.num_runs}</Text>
+          </Card.Body>
+        </Card.Root>
 
-        <Box flex="1" minW="200px" p={4} borderWidth="1px" borderRadius="md" bg="gray.50">
-          <Text fontSize="sm" color="gray.500">
-            Execution date
-          </Text>
-          <Text fontWeight="semibold">{creationDate}</Text>
-        </Box>
+        <Card.Root flex="1" minW="200px">
+          <Card.Body>
+            <Text textStyle="sm" color="fg.muted">
+              Execution date
+            </Text>
+            <Text fontWeight="semibold">{creationDate}</Text>
+          </Card.Body>
+        </Card.Root>
       </Flex>
 
       {/* selector de run con Select + createListCollection */}
@@ -140,49 +147,34 @@ export default function ExperimentDetails({ id }: { id: number }) {
         <Flex direction="column" gap={4} mt={6}>
             {/* Resumen de la run seleccionada */}
             <Flex gap={4} wrap="wrap">
-            <Box
-                flex="1"
-                minW="200px"
-                p={4}
-                borderWidth="1px"
-                borderRadius="md"
-                bg="gray.50"
-            >
-                <Text fontSize="sm" color="gray.500">
-                Run id
+            <Card.Root flex="1" minW="200px">
+              <Card.Body>
+                <Text textStyle="sm" color="fg.muted">
+                  Run id
                 </Text>
                 <Text fontWeight="semibold">{currentRun.id}</Text>
-            </Box>
+              </Card.Body>
+            </Card.Root>
 
-            <Box
-                flex="1"
-                minW="200px"
-                p={4}
-                borderWidth="1px"
-                borderRadius="md"
-                bg="gray.50"
-            >
-                <Text fontSize="sm" color="gray.500">
-                Elapsed time
+            <Card.Root flex="1" minW="200px">
+              <Card.Body>
+                <Text textStyle="sm" color="fg.muted">
+                  Elapsed time
                 </Text>
                 <Text fontWeight="semibold">
-                {currentRun.elapsed_time.toFixed(2)} s
+                  {currentRun.elapsed_time.toFixed(2)} s
                 </Text>
-            </Box>
+              </Card.Body>
+            </Card.Root>
 
-            <Box
-                flex="1"
-                minW="200px"
-                p={4}
-                borderWidth="1px"
-                borderRadius="md"
-                bg="gray.50"
-            >
-                <Text fontSize="sm" color="gray.500">
-                Configured model used for the run
+            <Card.Root flex="1" minW="200px">
+              <Card.Body>
+                <Text textStyle="sm" color="fg.muted">
+                  Configured model used for the run
                 </Text>
                 <Text fontWeight="semibold">{currentRun.configured_model.short_name}</Text>
-            </Box>
+              </Card.Body>
+            </Card.Root>
             </Flex>
 
             {/* Mobile app rankings */}
@@ -190,7 +182,7 @@ export default function ExperimentDetails({ id }: { id: number }) {
             <Heading as="h2" size="md" mb={2}>
                 Mobile app rankings
             </Heading>
-            <Box borderWidth="1px" borderRadius="md" p={3} bg="white">
+            <Box borderWidth="1px" rounded="md" p={3} bg="bg">
                 {currentRun.mobile_app_rankings.map((item) => (
                 <Flex
                     key={item.id}
@@ -212,7 +204,7 @@ export default function ExperimentDetails({ id }: { id: number }) {
             <Heading as="h2" size="md" mb={2}>
                 Ranking criteria
             </Heading>
-            <Box borderWidth="1px" borderRadius="md" p={3} bg="white">
+            <Box borderWidth="1px" rounded="md" p={3} bg="bg">
                 {currentRun.ranking_criteria.map((criterion) => (
                 <Box
                     key={criterion.id}
@@ -221,7 +213,7 @@ export default function ExperimentDetails({ id }: { id: number }) {
                     _last={{ borderBottomWidth: 0 }}
                 >
                     <Text fontWeight="semibold">{criterion.name}</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="sm" color="fg.muted">
                     {criterion.description}
                     </Text>
                 </Box>

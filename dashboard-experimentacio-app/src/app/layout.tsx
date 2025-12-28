@@ -19,13 +19,15 @@ export default function RootLayout({
     <html lang="en" className="light" suppressHydrationWarning>
       <body>
         <Providers>
-          <Box>
+          <Flex direction="column" h="100vh">
             <Navbar />
-            <Flex gap={4} h="100vh">
+            <Flex flex="1" overflow="hidden">
               <SideBar />
-              {children}
+              <Box flex="1" overflowY="auto">
+                {children}
+              </Box>
             </Flex>
-          </Box>
+          </Flex>
         </Providers>
       </body>
     </html>

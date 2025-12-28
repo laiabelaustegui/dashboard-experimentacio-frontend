@@ -1,4 +1,5 @@
 import { ConfiguredModel } from "./configuredModel";
+import { Feature } from "./promptTemplate";
 
 export type CreateExperimentDto = {
     name: string;
@@ -34,7 +35,8 @@ export type RankingCriterion = {
 export type ExperimentRun = {
   id: number;
   elapsed_time: number;
-  configured_model: ConfiguredModel; 
+  configured_model: ConfiguredModel;
+  feature: Feature;
   mobile_app_rankings: MobileAppRanking[];
   ranking_criteria: RankingCriterion[];
 };

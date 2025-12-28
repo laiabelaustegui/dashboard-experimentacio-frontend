@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import type { LLM } from "@/model/LLM";
+import type { LLM } from "@/models/LLM";
 import apiProvider from "@/providers/api";
 
 export function useLLMs() {

@@ -1,3 +1,15 @@
+export type Feature = {
+  id: number;
+  name: string;
+  description?: string;
+  user_prompt?: number; // FK to UserPrompt, optional when nested
+};
+
+export type CreateFeatureDto = {
+  name: string;
+  description?: string;
+};
+
 export type PromptTemplate = {
     id: number;
     name: string;
@@ -8,6 +20,8 @@ export type PromptTemplate = {
     };
     user_prompt: {
       text: string;
+      k?: number; // Number of items to recommend
+      features: Feature[];
     };
 };
 
@@ -19,6 +33,8 @@ export type CreatePromptTemplateDto = {
   };
   user_prompt: {
     text: string;
+    k?: number;
+    features?: CreateFeatureDto[];
   };
 };
 

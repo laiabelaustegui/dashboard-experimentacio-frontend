@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import type { PromptTemplate } from "@/model/promptTemplate";
+import type { PromptTemplate } from "@/models/promptTemplate";
 import apiProvider from "@/providers/api";
 
 export function usePromptTemplates() {

@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import apiProvider from "@/providers/api";
-import { Configuration } from "@/model/configuration";
+import { Configuration } from "@/models/configuration";
 
 export function useConfigurations() {
   const { data, error, isLoading, mutate } = useSWR<Configuration[]>(

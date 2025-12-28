@@ -2,24 +2,24 @@
 "use client";
 
 import {
-  Box,
+  Badge,
   Button,
+  Card,
+  Combobox,
   Field,
   Fieldset,
+  Flex,
   Input,
   NativeSelect,
   NumberInput,
   Stack,
   Text,
-  Flex,
-  Combobox,
   useFilter,
   useListCollection,
-  Badge,
 } from "@chakra-ui/react";
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { CreateExperimentDto } from "@/model/experiment";
+import type { CreateExperimentDto } from "@/models/experiment";
 import { useConfiguredModels } from "@/components/configured-models/useConfiguredModels";
 import { usePromptTemplates } from "@/components/prompt-templates/usePromptTemplates";
 import apiProvider from "@/providers/api";
@@ -80,19 +80,16 @@ export const ExperimentForm = () => {
 
 
   return (
-    <Box
-      as="form"
-      onSubmit={handleSubmit}
+    <Card.Root
+      asChild
       maxW="5xl"
       mt={4}
-      p={6}
-      borderWidth="1px"
-      borderRadius="lg"
-      bg="white"
     >
-      <Text mb={6} color="gray.600">
-        Please complete the following information to create a new experiment.
-      </Text>
+      <form onSubmit={handleSubmit}>
+        <Card.Body>
+          <Text mb={6} color="fg.muted">
+            Please complete the following information to create a new experiment.
+          </Text>
 
       <Flex direction={{ base: "column", md: "row" }} gap={8} align="flex-start">
         {/* Fieldset: detalles del experimento */}
@@ -130,10 +127,10 @@ export const ExperimentForm = () => {
                   {selectedItems.map((item) => (
                     <Badge
                       key={item.value}
-                      colorScheme="teal"
+                      colorPalette="teal"
                       px={2}
                       py={1}
-                      borderRadius="md"
+                      rounded="md"
                     >
                       {item.label}
                     </Badge>
@@ -220,6 +217,7 @@ export const ExperimentForm = () => {
                 value={numRuns}
                 onValueChange={(details) => setNumRuns(details.value)}
               >
+                <NumberInput.Control />
                 <NumberInput.Input name="num_runs" />
               </NumberInput.Root>
             </Field.Root>
@@ -231,10 +229,12 @@ export const ExperimentForm = () => {
         <Button type="button" variant="outline">
           Cancel
         </Button>
-        <Button type="submit" colorScheme="teal">
+        <Button type="submit" colorPalette="teal">
           Execute
         </Button>
       </Flex>
-    </Box>
+        </Card.Body>
+      </form>
+    </Card.Root>
   );
 };

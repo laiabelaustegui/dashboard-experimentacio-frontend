@@ -1,4 +1,4 @@
-import { Flex, Icon, LinkBox, LinkOverlay } from "@chakra-ui/react";
+import { Flex, LinkBox, LinkOverlay, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 
 export type LinkProps = {
@@ -10,15 +10,26 @@ export type LinkProps = {
 
 export default function Link({ href, title, icon, expanded }: LinkProps) {
     return (
-        <LinkBox bgColor="gray.100" display="flex" p={2} w="100%">
-            <LinkOverlay asChild>
-                <Flex align="center" gap={4} w="100%">
-                    <Icon color="blue.400">{icon}</Icon>
-                    <NextLink href={href}>
-                        {expanded ? title : ' '}
-                    </NextLink>
+        <LinkBox 
+          display="flex" 
+          p={2} 
+          w="100%"
+          borderRadius="md"
+          _hover={{ bg: "bg.subtle" }}
+          transition="background 0.2s"
+        >
+            <Flex align="center" gap={4} w="100%">
+                <Flex color="blue.400" fontSize="xl">
+                    {icon}
                 </Flex>
-            </LinkOverlay>
+                {expanded && (
+                    <LinkOverlay asChild>
+                        <NextLink href={href}>
+                            <Text>{title}</Text>
+                        </NextLink>
+                    </LinkOverlay>
+                )}
+            </Flex>
         </LinkBox>
     );
 }

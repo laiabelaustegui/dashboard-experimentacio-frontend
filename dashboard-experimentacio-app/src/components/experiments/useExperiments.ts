@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import type { Experiment } from "@/model/experiment";
+import type { Experiment } from "@/models/experiment";
 import apiProvider from "@/providers/api";
 
 export function useExperiments() {

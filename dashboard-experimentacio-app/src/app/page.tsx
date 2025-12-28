@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, SimpleGrid, Text } from "@chakra-ui/react";
+import { Flex, Heading, SimpleGrid } from "@chakra-ui/react";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { ExperimentsTable } from "@/components/experiments/ExperimentsTable";
 
@@ -11,26 +11,28 @@ export default function HomePage() {
         <QuickActionCard
           title="Large Language Models (LLMs)"
           actions={[
-            { href: "/llms/new", label: "Add new model", props: { colorScheme: "teal" } },
+            { href: "/llms/new", label: "Add new model", props: { colorPalette: "teal" } },
             { href: "/llms", label: "See models", props: { variant: "outline" } },
           ]}
         />
         <QuickActionCard
           title="Prompt Templates"
           actions={[
-            { href: "/prompt-templates/new", label: "Create template", props: { colorScheme: "teal" } },
+            { href: "/prompt-templates/new", label: "Create template", props: { colorPalette: "teal" } },
             { href: "/prompt-templates", label: "See templates", props: { variant: "outline" } },
           ]}
         />
         <QuickActionCard
           title="Experimentation"
           actions={[
-            { href: "/experiments/new", label: "Create experiment", props: { colorScheme: "teal" } },
+            { href: "/experiments/new", label: "Create experiment", props: { colorPalette: "teal" } },
             { href: "/experiments", label: "See recent experiments", props: { variant: "outline" } },
           ]}
         />
       </SimpleGrid>
-      <Text> Recent Experiments</Text>
+      <Heading as="h2" size="lg" mt={4}>
+        Recent Experiments
+      </Heading>
       <ExperimentsTable />
     </Flex>
   );

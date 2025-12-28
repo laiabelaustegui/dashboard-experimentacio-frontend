@@ -20,7 +20,7 @@ export const TemplatesTable = () => {
   if (isError) {
     return (
       <Center py={8}>
-        <Text color="red.500">
+        <Text color="fg.error">
           Error: {error?.message ?? "Unknown error"}
         </Text>
       </Center>
@@ -30,7 +30,7 @@ export const TemplatesTable = () => {
   if (templates.length === 0) {
     return (
       <Center py={8}>
-        <Text color="gray.500">No prompt templates found.</Text>
+        <Text color="fg.muted">No prompt templates found.</Text>
       </Center>
     );
   }
@@ -48,7 +48,7 @@ export const TemplatesTable = () => {
         {templates.map((template) => (
           <Table.Row key={template.id}
               cursor="pointer"
-              _hover={{bg: "gray.50"}}
+              _hover={{bg: "bg.subtle"}}
               onClick={() => router.push(`/prompt-templates/${template.id}`)}
           >
             <Table.Cell>{template.name}</Table.Cell>
@@ -61,7 +61,7 @@ export const TemplatesTable = () => {
                 aria-label="Delete"
                 size="sm"
                 variant="ghost"
-                colorScheme="red"
+                colorPalette="red"
                 onClick={() => deleteTemplate(template.id)}
               >
                 <IoTrash />

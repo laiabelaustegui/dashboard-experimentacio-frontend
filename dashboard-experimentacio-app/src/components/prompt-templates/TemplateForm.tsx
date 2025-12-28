@@ -9,15 +9,19 @@ import {
   Fieldset,
   Input,
   Stack,
+  Text,
   Textarea,
 } from "@chakra-ui/react";
 
 import apiProvider from "@/providers/api";
-import type { CreatePromptTemplateDto } from "@/model/promptTemplate";
+import type { CreatePromptTemplateDto, CreateFeatureDto } from "@/models/promptTemplate";
 
 export function TemplateForm() {
   const [schemaJson, setSchemaJson] = useState("");
   const router = useRouter();
+
+  const [features, setFeatures] = useState<CreateFeatureDto[]>([]);
+  const [newFeature, setNewFeature] = useState<CreateFeatureDto>({ name: "", description: "" });
 
   const handleCancel = () => {
     router.push("/prompt-templates");
@@ -50,6 +54,7 @@ export function TemplateForm() {
     const name = (form.elements.namedItem("name") as HTMLInputElement).value;
     const systemPrompt = (form.elements.namedItem("systemPrompt") as HTMLTextAreaElement).value;
     const userPrompt = (form.elements.namedItem("userPrompt") as HTMLTextAreaElement).value;
+    const kValue = (form.elements.namedItem("k") as HTMLInputElement).value;
 
     // Construcción del DTO
     const dto: CreatePromptTemplateDto = {
@@ -60,6 +65,8 @@ export function TemplateForm() {
       },
       user_prompt: {
         text: userPrompt,
+        k: kValue ? Number(kValue) : undefined,
+        features: features.length > 0 ? features : undefined,
       },
     };
 
@@ -140,7 +147,7 @@ export function TemplateForm() {
           <Stack mb={2}>
             <Fieldset.Legend>User Prompt</Fieldset.Legend>
             <Fieldset.HelperText>
-              Define the user prompt text for the template.
+              Define the user prompt text and the features for the template.
             </Fieldset.HelperText>
           </Stack>
 
@@ -149,16 +156,88 @@ export function TemplateForm() {
               <Field.Label>User Prompt Text</Field.Label>
               <Textarea
                 name="userPrompt"
-                placeholder="User prompt text"
+                placeholder="Recommend {{ k }} apps for {{ feature }}."
                 rows={3}
               />
+            </Field.Root>
+            {/* k opcional */}
+            <Field.Root>
+              <Field.Label>k (optional)</Field.Label>
+              <Input
+                name="k"
+                type="number"
+                placeholder="Number of apps to recommend"
+              />
+            </Field.Root>
+
+            {/* Features */}
+            <Field.Root>
+              <Field.Label>Features</Field.Label>
+              <Stack gap={2}>
+                <Input
+                  placeholder="Feature name (e.g. Build photo collages)"
+                  value={newFeature.name}
+                  onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
+                />
+                <Input
+                  placeholder="Feature description (optional)"
+                  value={newFeature.description || ""}
+                  onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
+                />
+                <Button
+                  type="button"
+                  alignSelf="flex-start"
+                  onClick={() => {
+                    if (!newFeature.name.trim()) return;
+                    setFeatures((prev) => [...prev, { 
+                      name: newFeature.name.trim(), 
+                      description: newFeature.description?.trim() || undefined 
+                    }]);
+                    setNewFeature({ name: "", description: "" });
+                  }}
+                >
+                  Add
+                </Button>
+              </Stack>
+              {/* Lista de features añadidas */}
+              <Stack mt={2}>
+                {features.map((feat, idx) => (
+                  <Stack
+                    key={`${feat.name}-${idx}`}
+                    direction="row"
+                    justify="space-between"
+                    align="center"
+                    p={2}
+                    borderWidth="1px"
+                    borderRadius="md"
+                  >
+                    <Stack gap={0}>
+                      <Text fontWeight="semibold">{feat.name}</Text>
+                      {feat.description && (
+                        <Text textStyle="sm" color="fg.muted">
+                          {feat.description}
+                        </Text>
+                      )}
+                    </Stack>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() =>
+                        setFeatures((prev) => prev.filter((_, i) => i !== idx))
+                      }
+                    >
+                      Remove
+                    </Button>
+                  </Stack>
+                ))}
+              </Stack>
             </Field.Root>
           </Fieldset.Content>
         </Fieldset.Root>
 
         <Stack alignSelf="flex-start">
           <ButtonGroup gap={4}>
-            <Button type="submit" colorScheme="blue">
+            <Button type="submit" colorPalette="blue">
               Submit
             </Button>
             <Button variant="outline" onClick={handleCancel}>

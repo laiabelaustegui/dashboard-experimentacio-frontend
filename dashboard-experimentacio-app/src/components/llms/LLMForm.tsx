@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 
 import apiProvider from "@/providers/api";
-import { CreateLLMDto } from "@/model/LLM";
+import { CreateLLMDto } from "@/models/LLM";
 
 export function LLMForm() {
   const router = useRouter();

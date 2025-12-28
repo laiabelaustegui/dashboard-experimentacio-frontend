@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import type { ConfiguredModel } from "@/model/configuredModel";
+import type { ConfiguredModel } from "@/models/configuredModel";
 import apiProvider from "@/providers/api";
 
 export function useConfiguredModels() {
