@@ -55,7 +55,7 @@ export const ExperimentForm = () => {
     const dto: CreateExperimentDto = {
       name,
       prompt_template: Number(promptTemplateId),
-      configurated_models: selectedModelIds.map(Number),
+      configured_models: selectedModelIds.map(Number),
       num_runs: Number(numRuns),
     };
 

@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, use } from "react";
 import { useExperiment } from "@/components/experiments/useExperiment";
 
 // Import ApexCharts dynamically to avoid SSR issues
@@ -101,15 +101,47 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
   const lineChartOptions = useMemo(() => {
     if (chartType !== "line" || selectedRuns.length === 0) return null;
 
-    const series = [
-      {
-        name: "Elapsed Time (s)",
-        data: selectedRuns.map((run) => ({
-          x: `Run #${experiment!.runs.findIndex((r) => r.id === run.id) + 1}`,
-          y: run.elapsed_time,
-        })),
-      },
-    ];
+    // Agrupar runs por modelo configurado
+    const runsByModel = selectedRuns.reduce((acc, run) => {
+      const modelName = run.configured_model.short_name;
+      if (!acc[modelName]) {
+        acc[modelName] = [];
+      }
+      acc[modelName].push(run);
+      return acc;
+    }, {} as Record<string, typeof selectedRuns>);
+
+    // Obtener el número máximo de posiciones (rankings)
+    const maxRank = Math.max(
+      ...selectedRuns.flatMap((run) =>
+        run.mobile_app_rankings.map((r) => r.rank)
+      )
+    );
+
+    // Crear una serie por cada modelo configurado
+    const series = Object.entries(runsByModel).map(([modelName, runs]) => {
+      const data = [];
+      for (let position = 1; position <= maxRank; position++) {
+        const appsAtPosition = new Set<string>();
+        
+        runs.forEach((run) => {
+          const ranking = run.mobile_app_rankings.find((r) => r.rank === position);
+          if (ranking) {
+            appsAtPosition.add(ranking.mobile_app);
+          }
+        });
+
+        data.push({
+          x: `${position}`,
+          y: appsAtPosition.size,
+        });
+      }
+
+      return {
+        name: modelName,
+        data,
+      };
+    });
 
     return {
       options: {
@@ -128,19 +160,26 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
         },
         xaxis: {
           title: {
-            text: "Runs",
+            text: "Ranking Position",
           },
+          min: 0,
+          tickAmount: maxRank,
         },
         yaxis: {
           title: {
-            text: "Elapsed Time (seconds)",
+            text: "Number of Distinct Apps",
           },
+          forceNiceScale: true,
+          min: 0,
         },
         title: {
-          text: "Elapsed Time by Run",
+          text: "Distinct Apps per Ranking Position by Model",
           align: "center" as const,
         },
-        colors: ["#008FFB"],
+        legend: {
+          show: true,
+          position: "top" as const,
+        },
       },
       series,
     };
@@ -234,11 +273,13 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
 export default function ExperimentChartPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const resolvedParams = use(params);
+  
   return (
     <Suspense fallback={<Text>Loading...</Text>}>
-      <ChartPageContent experimentId={params.id} />
+      <ChartPageContent experimentId={resolvedParams.id} />
     </Suspense>
   );
 }

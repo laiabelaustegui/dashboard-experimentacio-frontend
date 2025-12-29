@@ -106,7 +106,19 @@ export default function ChartConfigModal({
 
             {/* Runs Selection */}
             <Flex direction="column" gap={2}>
-              <Text fontWeight="medium">Select Runs</Text>
+              <Flex justify="space-between" align="center">
+                <Text fontWeight="medium">Select Runs</Text>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => {
+                    const allRunIds = runs.map((run) => String(run.id));
+                    setSelectedRuns(allRunIds);
+                  }}
+                >
+                  Select All
+                </Button>
+              </Flex>
               <Text textStyle="sm" color="fg.muted">
                 Choose one or more runs to include in the chart
               </Text>
