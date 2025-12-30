@@ -22,6 +22,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
   const { experiment, isLoading, isError } = useExperiment(Number(experimentId));
 
   const chartType = searchParams.get("chartType") || "heatmap";
+  const heatmapType = searchParams.get("heatmapType") || "frequency";
   const selectedRunIds = searchParams.get("runs")?.split(",").map(Number) || [];
 
   // Filter runs based on selection
@@ -34,68 +35,157 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
   const heatmapOptions = useMemo(() => {
     if (chartType !== "heatmap" || selectedRuns.length === 0) return null;
 
-    // Get all unique mobile apps
-    const mobileApps = Array.from(
-      new Set(
-        selectedRuns.flatMap((run) =>
-          run.mobile_app_rankings.map((r) => r.mobile_app)
+    if (heatmapType === "frequency") {
+      // Frequency Heatmap: X-axis = ranking positions, Y-axis = apps, value = frequency
+      const mobileApps = Array.from(
+        new Set(
+          selectedRuns.flatMap((run) =>
+            run.mobile_app_rankings.map((r) => r.mobile_app)
+          )
         )
-      )
-    ).sort();
+      ).sort();
 
-    // Create series data for heatmap
-    const series = selectedRuns.map((run, index) => ({
-      name: `Run #${experiment!.runs.findIndex((r) => r.id === run.id) + 1}`,
-      data: mobileApps.map((app) => {
-        const ranking = run.mobile_app_rankings.find((r) => r.mobile_app === app);
-        return ranking ? ranking.rank : 0;
-      }),
-    }));
+      // Get all unique ranking positions
+      const allRanks = Array.from(
+        new Set(
+          selectedRuns.flatMap((run) =>
+            run.mobile_app_rankings.map((r) => r.rank)
+          )
+        )
+      ).sort((a, b) => a - b);
 
-    return {
-      options: {
-        chart: {
-          type: "heatmap" as const,
-          toolbar: {
-            show: true,
+      // Calculate frequency: for each app, count how many times it appears at each position
+      const series = mobileApps.map((app) => ({
+        name: app,
+        data: allRanks.map((rank) => {
+          // Count how many times this app appears at this rank across all selected runs
+          const frequency = selectedRuns.filter((run) =>
+            run.mobile_app_rankings.some((r) => r.mobile_app === app && r.rank === rank)
+          ).length;
+          return frequency;
+        }),
+      }));
+
+      const maxFrequency = Math.max(...series.flatMap((s) => s.data), 1);
+
+      return {
+        options: {
+          chart: {
+            type: "heatmap" as const,
+            toolbar: {
+              show: true,
+            },
           },
-        },
-        dataLabels: {
-          enabled: true,
-        },
-        colors: ["#008FFB"],
-        xaxis: {
-          categories: mobileApps,
+          dataLabels: {
+            enabled: true,
+          },
+          colors: ["#008FFB"],
+          xaxis: {
+            categories: allRanks.map(rank => `Position ${rank}`),
+            title: {
+              text: "Ranking Position",
+            },
+          },
+          yaxis: {
+            title: {
+              text: "Mobile Apps",
+            },
+            labels: {
+              maxWidth: 200,
+              style: {
+                fontSize: '12px',
+              },
+            },
+          },
           title: {
-            text: "Mobile Apps",
+            text: "App Frequency by Ranking Position",
+            align: "center" as const,
           },
-        },
-        yaxis: {
-          title: {
-            text: "Runs",
-          },
-        },
-        title: {
-          text: "Mobile App Rankings Heatmap",
-          align: "center" as const,
-        },
-        plotOptions: {
-          heatmap: {
-            shadeIntensity: 0.5,
-            colorScale: {
-              ranges: [
-                { from: 1, to: 1, color: "#00A100", name: "1st" },
-                { from: 2, to: 2, color: "#128FD9", name: "2nd" },
-                { from: 3, to: 3, color: "#FFB200", name: "3rd" },
-                { from: 4, to: 10, color: "#FF0000", name: "4th+" },
-              ],
+          plotOptions: {
+            heatmap: {
+              shadeIntensity: 0.5,
+              colorScale: {
+                min: 0,
+                max: maxFrequency,
+              },
             },
           },
         },
-      },
-      series,
-    };
-  }, [chartType, selectedRuns, experiment]);
+        series,
+      };
+    } else {
+      // Score Heatmap: X-axis = apps, Y-axis = runs, value = score
+      const mobileApps = Array.from(
+        new Set(
+          selectedRuns.flatMap((run) =>
+            run.mobile_app_rankings.map((r) => r.mobile_app)
+          )
+        )
+      ).sort();
+
+      const series = selectedRuns.map((run, index) => ({
+        name: `Run #${experiment!.runs.findIndex((r) => r.id === run.id) + 1}`,
+        data: mobileApps.map((app) => {
+          const ranking = run.mobile_app_rankings.find((r) => r.mobile_app === app);
+          return ranking ? (ranking.score || 0) : 0;
+        }),
+      }));
+
+      const maxScore = Math.max(...series.flatMap((s) => s.data), 1);
+
+      return {
+        options: {
+          chart: {
+            type: "heatmap" as const,
+            toolbar: {
+              show: true,
+            },
+          },
+          dataLabels: {
+            enabled: true,
+          },
+          colors: ["#008FFB"],
+          xaxis: {
+            categories: mobileApps,
+            title: {
+              text: "Mobile Apps",
+            },
+            labels: {
+              rotate: -45,
+              rotateAlways: true,
+              style: {
+                fontSize: '12px',
+              },
+            },
+          },
+          yaxis: {
+            title: {
+              text: "Runs",
+            },
+            labels: {
+              style: {
+                fontSize: '12px',
+              },
+            },
+          },
+          title: {
+            text: "Mobile App Scores Heatmap",
+            align: "center" as const,
+          },
+          plotOptions: {
+            heatmap: {
+              shadeIntensity: 0.5,
+              colorScale: {
+                min: 0,
+                max: maxScore,
+              },
+            },
+          },
+        },
+        series,
+      };
+    }
+  }, [chartType, heatmapType, selectedRuns, experiment]);
 
   // Generate line chart data
   const lineChartOptions = useMemo(() => {
@@ -215,7 +305,11 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
     <Flex direction="column" gap={4} p={4} w="full">
       <Flex justify="space-between" align="center">
         <Heading as="h1" size="lg">
-          {experiment.name} - {chartType === "heatmap" ? "Heatmap" : "Line Chart"}
+          {experiment.name} - {
+            chartType === "heatmap" 
+              ? `${heatmapType === "frequency" ? "Frequency" : "Score"} Heatmap`
+              : "Line Chart"
+          }
         </Heading>
         <Button variant="outline" onClick={() => router.back()}>
           Back to Experiment
