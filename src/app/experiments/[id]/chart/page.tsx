@@ -35,7 +35,162 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
   const heatmapOptions = useMemo(() => {
     if (chartType !== "heatmap" || selectedRuns.length === 0) return null;
 
-    if (heatmapType === "frequency") {
+    if (heatmapType === "jaccard") {
+      // Jaccard Similarity Heatmap: X-axis = ranking positions, Y-axis = features
+      // Value = Jaccard similarity of the set of apps at that position across runs with the same feature
+      
+      // Group runs by feature
+      const runsByFeature = selectedRuns.reduce((acc, run) => {
+        const featureName = run.feature.name;
+        if (!acc[featureName]) {
+          acc[featureName] = [];
+        }
+        acc[featureName].push(run);
+        return acc;
+      }, {} as Record<string, typeof selectedRuns>);
+
+      // Get all unique ranking positions
+      const allRanks = Array.from(
+        new Set(
+          selectedRuns.flatMap((run) =>
+            run.mobile_app_rankings.map((r) => r.rank)
+          )
+        )
+      ).sort((a, b) => a - b);
+
+      // Calculate Jaccard similarity for each feature at each position
+      const series = Object.entries(runsByFeature).map(([featureName, runs]) => {
+        // Only calculate if there are at least 2 runs for this feature
+        const data = allRanks.map((rank) => {
+          if (runs.length < 2) {
+            return 0; // Can't calculate similarity with less than 2 runs
+          }
+
+          // Get the set of apps at this position for each run
+          const appSetsAtPosition = runs.map((run) => {
+            const appsAtRank = run.mobile_app_rankings
+              .filter((r) => r.rank === rank)
+              .map((r) => r.mobile_app);
+            return new Set(appsAtRank);
+          });
+
+          // Calculate average pairwise Jaccard similarity
+          let totalSimilarity = 0;
+          let pairCount = 0;
+
+          for (let i = 0; i < appSetsAtPosition.length; i++) {
+            for (let j = i + 1; j < appSetsAtPosition.length; j++) {
+              const setA = appSetsAtPosition[i];
+              const setB = appSetsAtPosition[j];
+
+              // Calculate Jaccard similarity: |A ∩ B| / |A ∪ B|
+              const intersection = new Set([...setA].filter(x => setB.has(x)));
+              const union = new Set([...setA, ...setB]);
+
+              const jaccardSimilarity = union.size > 0 
+                ? intersection.size / union.size 
+                : 0;
+
+              totalSimilarity += jaccardSimilarity;
+              pairCount++;
+            }
+          }
+
+          // Return average Jaccard similarity (0 to 1)
+          return pairCount > 0 ? totalSimilarity / pairCount : 0;
+        });
+
+        return {
+          name: featureName,
+          data,
+        };
+      });
+
+      return {
+        options: {
+          chart: {
+            type: "heatmap" as const,
+            toolbar: {
+              show: true,
+            },
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: (val: number) => val.toFixed(3),
+          },
+          colors: ["#00E396"],
+          xaxis: {
+            categories: allRanks.map(rank => `Pos ${rank}`),
+            title: {
+              text: "Ranking Position",
+            },
+          },
+          yaxis: {
+            title: {
+              text: "Features",
+            },
+            labels: {
+              maxWidth: 200,
+              style: {
+                fontSize: '12px',
+              },
+            },
+          },
+          title: {
+            text: "App Ranking Internal Consistency (Jaccard Similarity)",
+            align: "center" as const,
+          },
+          subtitle: {
+            text: "Higher values indicate more consistent app rankings across runs",
+            align: "center" as const,
+          },
+          plotOptions: {
+            heatmap: {
+              shadeIntensity: 0.5,
+              colorScale: {
+                min: 0,
+                max: 1,
+                ranges: [
+                  {
+                    from: 0,
+                    to: 0.3,
+                    color: '#FF4560',
+                    name: 'Low',
+                  },
+                  {
+                    from: 0.3,
+                    to: 0.7,
+                    color: '#FEB019',
+                    name: 'Medium',
+                  },
+                  {
+                    from: 0.7,
+                    to: 1,
+                    color: '#00E396',
+                    name: 'High',
+                  },
+                ],
+              },
+            },
+          },
+          tooltip: {
+            custom: ({ seriesIndex, dataPointIndex, w }: any) => {
+              const featureName = w.config.series[seriesIndex].name;
+              const position = allRanks[dataPointIndex];
+              const similarity = w.config.series[seriesIndex].data[dataPointIndex];
+              const percentage = (similarity * 100).toFixed(1);
+              
+              return `<div style="padding: 8px; background: white; border: 1px solid #ccc;">
+                <strong>${featureName}</strong><br/>
+                Position: ${position}<br/>
+                Jaccard Similarity: ${similarity.toFixed(3)} (${percentage}%)
+              </div>`;
+            },
+          },
+        },
+        series,
+      };
+    } else if (heatmapType === "frequency") {
       // Frequency Heatmap: X-axis = ranking positions, Y-axis = apps, value = frequency
       const mobileApps = Array.from(
         new Set(
@@ -107,77 +262,6 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
               colorScale: {
                 min: 0,
                 max: maxFrequency,
-              },
-            },
-          },
-        },
-        series,
-      };
-    } else {
-      // Score Heatmap: X-axis = apps, Y-axis = runs, value = score
-      const mobileApps = Array.from(
-        new Set(
-          selectedRuns.flatMap((run) =>
-            run.mobile_app_rankings.map((r) => r.mobile_app)
-          )
-        )
-      ).sort();
-
-      const series = selectedRuns.map((run, index) => ({
-        name: `Run #${experiment!.runs.findIndex((r) => r.id === run.id) + 1}`,
-        data: mobileApps.map((app) => {
-          const ranking = run.mobile_app_rankings.find((r) => r.mobile_app === app);
-          return ranking ? (ranking.score || 0) : 0;
-        }),
-      }));
-
-      const maxScore = Math.max(...series.flatMap((s) => s.data), 1);
-
-      return {
-        options: {
-          chart: {
-            type: "heatmap" as const,
-            toolbar: {
-              show: true,
-            },
-          },
-          dataLabels: {
-            enabled: true,
-          },
-          colors: ["#008FFB"],
-          xaxis: {
-            categories: mobileApps,
-            title: {
-              text: "Mobile Apps",
-            },
-            labels: {
-              rotate: -45,
-              rotateAlways: true,
-              style: {
-                fontSize: '12px',
-              },
-            },
-          },
-          yaxis: {
-            title: {
-              text: "Runs",
-            },
-            labels: {
-              style: {
-                fontSize: '12px',
-              },
-            },
-          },
-          title: {
-            text: "Mobile App Scores Heatmap",
-            align: "center" as const,
-          },
-          plotOptions: {
-            heatmap: {
-              shadeIntensity: 0.5,
-              colorScale: {
-                min: 0,
-                max: maxScore,
               },
             },
           },
@@ -307,7 +391,9 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
         <Heading as="h1" size="lg">
           {experiment.name} - {
             chartType === "heatmap" 
-              ? `${heatmapType === "frequency" ? "Frequency" : "Score"} Heatmap`
+              ? heatmapType === "frequency" 
+                ? "Frequency Heatmap"
+                : "Jaccard Similarity Heatmap"
               : "Line Chart"
           }
         </Heading>

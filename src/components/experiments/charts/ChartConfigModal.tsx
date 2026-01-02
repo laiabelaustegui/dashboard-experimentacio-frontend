@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 
 type ChartType = "heatmap" | "line";
-type HeatmapType = "frequency" | "score";
+type HeatmapType = "frequency" | "jaccard";
 type SelectionMode = "runs" | "feature";
 
 interface ChartConfigModalProps {
@@ -46,7 +46,7 @@ export default function ChartConfigModal({
   const heatmapTypeCollection = createListCollection({
     items: [
       { value: "frequency", label: "Frequency Heatmap" },
-      { value: "score", label: "Score Heatmap" },
+      { value: "jaccard", label: "Jaccard Similarity (Internal Consistency)" },
     ],
   });
 
@@ -78,8 +78,12 @@ export default function ChartConfigModal({
   const handleGenerate = () => {
     let runsToUse = selectedRuns;
 
+    // If jaccard heatmap, use all runs (to calculate jaccard by feature)
+    if (heatmapType === "jaccard") {
+      runsToUse = runs.map((run) => String(run.id));
+    }
     // If feature mode, get all runs with the selected feature
-    if (selectionMode === "feature" && selectedFeature) {
+    else if (selectionMode === "feature" && selectedFeature) {
       runsToUse = runs
         .filter((run) => run.feature.name === selectedFeature)
         .map((run) => String(run.id));
@@ -185,12 +189,12 @@ export default function ChartConfigModal({
                 <Text textStyle="xs" color="fg.muted">
                   {heatmapType === "frequency" 
                     ? "Shows how often each app appears at each ranking position" 
-                    : "Shows actual score values for each app"}
+                    : "Shows ranking consistency using Jaccard similarity by feature and position"}
                 </Text>
               </Flex>
             )}
 
-            {/* Selection Mode - shown only for frequency heatmap */}
+            {/* Selection Mode - shown only for frequency heatmap (jaccard always uses feature mode) */}
             {chartType === "heatmap" && heatmapType === "frequency" && (
               <Flex direction="column" gap={2}>
                 <Text fontWeight="medium">Selection Mode</Text>
@@ -229,8 +233,8 @@ export default function ChartConfigModal({
               </Flex>
             )}
 
-            {/* Feature Selection - shown when selection mode is feature */}
-            {chartType === "heatmap" && heatmapType === "frequency" && selectionMode === "feature" && (
+            {/* Feature Selection - shown when selection mode is feature or for jaccard heatmap */}
+            {chartType === "heatmap" && (heatmapType === "jaccard" || (heatmapType === "frequency" && selectionMode === "feature")) && (
               <Flex direction="column" gap={2}>
                 <Text fontWeight="medium">Select Feature</Text>
                 <Text textStyle="sm" color="fg.muted">
@@ -269,8 +273,8 @@ export default function ChartConfigModal({
               </Flex>
             )}
 
-            {/* Runs Selection - shown when not using feature mode or for other chart types */}
-            {!(chartType === "heatmap" && heatmapType === "frequency" && selectionMode === "feature") && (
+            {/* Runs Selection - shown when not using feature mode or for other chart types (not for jaccard) */}
+            {!(chartType === "heatmap" && (heatmapType === "jaccard" || (heatmapType === "frequency" && selectionMode === "feature"))) && (
             <Flex direction="column" gap={2}>
               <Flex justify="space-between" align="center">
                 <Text fontWeight="medium">Select Runs</Text>
@@ -341,8 +345,10 @@ export default function ChartConfigModal({
             colorPalette="teal"
             onClick={handleGenerate}
             disabled={
-              (selectionMode === "runs" && selectedRuns.length === 0) ||
-              (selectionMode === "feature" && !selectedFeature)
+              heatmapType === "jaccard" ? false : (
+                (selectionMode === "runs" && selectedRuns.length === 0) ||
+                (selectionMode === "feature" && !selectedFeature)
+              )
             }
           >
             Generate Chart
