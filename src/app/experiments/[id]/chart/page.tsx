@@ -116,11 +116,16 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
           },
           dataLabels: {
             enabled: true,
-            formatter: (val: number) => val.toFixed(3),
+            formatter: (val: number) => val.toFixed(2),
+            style: {
+              colors: ['#000000'],
+              fontSize: '12px',
+              fontWeight: 'bold',
+            },
           },
-          colors: ["#00E396"],
+          colors: ["#FFEB3B"],
           xaxis: {
-            categories: allRanks.map(rank => `Pos ${rank}`),
+            categories: allRanks.map(rank => `${rank}`),
             title: {
               text: "Ranking Position",
             },
@@ -130,9 +135,9 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
               text: "Features",
             },
             labels: {
-              maxWidth: 200,
+              maxWidth: 400,
               style: {
-                fontSize: '12px',
+                fontSize: '11px',
               },
             },
           },
@@ -147,27 +152,42 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
           plotOptions: {
             heatmap: {
               shadeIntensity: 0.5,
+              radius: 2,
+              useFillColorAsStroke: false,
+              distributed: false,
               colorScale: {
                 min: 0,
                 max: 1,
                 ranges: [
                   {
                     from: 0,
-                    to: 0.3,
-                    color: '#FF4560',
+                    to: 0.2,
+                    color: '#FDD835',
+                    name: 'Very Low',
+                  },
+                  {
+                    from: 0.2,
+                    to: 0.4,
+                    color: '#FBC02D',
                     name: 'Low',
                   },
                   {
-                    from: 0.3,
-                    to: 0.7,
-                    color: '#FEB019',
+                    from: 0.4,
+                    to: 0.6,
+                    color: '#66BB6A',
                     name: 'Medium',
                   },
                   {
-                    from: 0.7,
-                    to: 1,
-                    color: '#00E396',
+                    from: 0.6,
+                    to: 0.8,
+                    color: '#42A5F5',
                     name: 'High',
+                  },
+                  {
+                    from: 0.8,
+                    to: 1,
+                    color: '#1565C0',
+                    name: 'Very High',
                   },
                 ],
               },
@@ -183,7 +203,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
               return `<div style="padding: 8px; background: white; border: 1px solid #ccc;">
                 <strong>${featureName}</strong><br/>
                 Position: ${position}<br/>
-                Jaccard Similarity: ${similarity.toFixed(3)} (${percentage}%)
+                Jaccard Similarity: ${similarity.toFixed(1)} (${percentage}%)
               </div>`;
             },
           },
@@ -199,6 +219,9 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
           )
         )
       ).sort();
+
+      // Get the feature name from selected runs
+      const featureName = selectedRuns.length > 0 ? selectedRuns[0].feature.name : "";
 
       // Get all unique ranking positions
       const allRanks = Array.from(
@@ -233,10 +256,15 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
           },
           dataLabels: {
             enabled: true,
+            style: {
+              colors: ['#000000'],
+              fontSize: '12px',
+              fontWeight: 'bold',
+            },
           },
-          colors: ["#008FFB"],
+          colors: ["#FFEB3B"],
           xaxis: {
-            categories: allRanks.map(rank => `Position ${rank}`),
+            categories: allRanks.map(rank => `${rank}`),
             title: {
               text: "Ranking Position",
             },
@@ -246,22 +274,57 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
               text: "Mobile Apps",
             },
             labels: {
-              maxWidth: 200,
+              maxWidth: 400,
               style: {
-                fontSize: '12px',
+                fontSize: '11px',
               },
             },
           },
           title: {
-            text: "App Frequency by Ranking Position",
+            text: `App Frequency by Ranking Position - ${featureName}`,
             align: "center" as const,
           },
           plotOptions: {
             heatmap: {
               shadeIntensity: 0.5,
+              radius: 2,
+              useFillColorAsStroke: false,
+              distributed: false,
               colorScale: {
                 min: 0,
                 max: maxFrequency,
+                ranges: [
+                  {
+                    from: 0,
+                    to: maxFrequency * 0.2,
+                    color: '#FDD835',
+                    name: 'Very Low',
+                  },
+                  {
+                    from: maxFrequency * 0.2,
+                    to: maxFrequency * 0.4,
+                    color: '#FBC02D',
+                    name: 'Low',
+                  },
+                  {
+                    from: maxFrequency * 0.4,
+                    to: maxFrequency * 0.6,
+                    color: '#66BB6A',
+                    name: 'Medium',
+                  },
+                  {
+                    from: maxFrequency * 0.6,
+                    to: maxFrequency * 0.8,
+                    color: '#42A5F5',
+                    name: 'High',
+                  },
+                  {
+                    from: maxFrequency * 0.8,
+                    to: maxFrequency,
+                    color: '#1565C0',
+                    name: 'Very High',
+                  },
+                ],
               },
             },
           },
@@ -352,7 +415,29 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
         },
         legend: {
           show: true,
+          showForSingleSeries: true,
           position: "top" as const,
+          horizontalAlign: "left" as const,
+          floating: false,
+          fontSize: '14px',
+          fontFamily: 'inherit',
+          fontWeight: 500,
+          offsetY: 0,
+          offsetX: 0,
+          labels: {
+            colors: undefined,
+            useSeriesColors: false,
+          },
+          markers: {
+            width: 14,
+            height: 14,
+            strokeWidth: 0,
+            radius: 12,
+          },
+          itemMargin: {
+            horizontal: 15,
+            vertical: 8,
+          },
         },
       },
       series,
@@ -410,7 +495,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
                 options={heatmapOptions.options}
                 series={heatmapOptions.series}
                 type="heatmap"
-                height={400}
+                height={Math.max(400, heatmapOptions.series.length * 60)}
               />
             )}
 
