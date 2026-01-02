@@ -12,10 +12,12 @@ import {
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useExperiment } from "./useExperiment";
+import ChartConfigModal from "./charts/ChartConfigModal";
 
 export default function ExperimentDetails({ id }: { id: number }) {
   const { experiment, isLoading, isError, error } = useExperiment(id);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
 
   const creationDate = experiment?.execution_date.slice(0, 10);
   const runs = experiment?.runs ?? [];
@@ -62,10 +64,9 @@ export default function ExperimentDetails({ id }: { id: number }) {
         <Button
           colorPalette="teal"
           onClick={() => {
-            // aquí luego disparas la lógica de generación de gráficos
-            // por ahora, por ejemplo:
-            console.log("Generate charts for experiment", experiment.id);
+            setIsChartModalOpen(true);
           }}
+          disabled={runs.length === 0}
         >
           Generate charts
         </Button>
@@ -222,6 +223,14 @@ export default function ExperimentDetails({ id }: { id: number }) {
             </Box>
         </Flex>
         )}
+
+      {/* Chart Configuration Modal */}
+      <ChartConfigModal
+        open={isChartModalOpen}
+        onClose={() => setIsChartModalOpen(false)}
+        experimentId={experiment.id}
+        runs={runs}
+      />
     </Flex>
   );
 }
