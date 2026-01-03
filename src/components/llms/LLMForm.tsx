@@ -81,9 +81,9 @@ export function LLMForm() {
         {/* Template details */}
         <Fieldset.Root size="lg">
           <Stack mb={2}>
-            <Fieldset.Legend>Register New Model</Fieldset.Legend>
+            <Fieldset.Legend>Register New Base Model</Fieldset.Legend>
             <Fieldset.HelperText>
-              Provide complete the following details to add a new LLM model.
+              Provide complete the following details to add a new LLM base model.
             </Fieldset.HelperText>
           </Stack>
 

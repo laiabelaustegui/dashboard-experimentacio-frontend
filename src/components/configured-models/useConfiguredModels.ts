@@ -53,6 +53,7 @@ export function useConfiguredModels() {
     isError: !!error,
     error,
     deleteConfiguredModel,
+    mutate,
   };
 }
 
