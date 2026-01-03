@@ -12,7 +12,8 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 
-import apiProvider from "@/providers/api";
+import apiProvider, { ApiError } from "@/providers/api";
+import { toaster } from "@/components/ui/toaster";
 import { CreateLLMDto } from "@/models/LLM";
 
 export function LLMForm() {
@@ -46,10 +47,31 @@ export function LLMForm() {
         body: dto,
       });
 
+      toaster.create({
+        title: "LLM added",
+        description: "The LLM has been successfully added.",
+        type: "success",
+        duration: 3000,
+      });
+
       router.push("/llms");
     } catch (error) {
-      console.error("Error adding LLM", error);
-      // aquí puedes poner un toast o notificación
+      if (error instanceof ApiError) {
+        toaster.create({
+          title: "Error adding LLM",
+          description: error.message,
+          type: "error",
+          duration: 5000,
+        });
+      } else {
+        toaster.create({
+          title: "Error adding LLM",
+          description: "An unexpected error occurred. Please try again.",
+          type: "error",
+          duration: 5000,
+        });
+      }
+      console.error("Error adding LLM:", error);
     }
   };
 

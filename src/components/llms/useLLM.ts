@@ -2,7 +2,8 @@
 
 import useSWR from "swr";
 import type { LLM } from "@/models/LLM";
-import apiProvider from "@/providers/api";
+import apiProvider, { ApiError } from "@/providers/api";
+import { toaster } from "@/components/ui/toaster";
 
 export function useLLMs() {
   const { data, error, isLoading, mutate } = useSWR<LLM[]>(
@@ -10,11 +11,37 @@ export function useLLMs() {
   )
 
   const deleteLLM = async (id: number) => {
-    // petición DELETE al endpoint concreto
-    await apiProvider.delete<void>(`/llms/${id}/`);
+    try {
+      // petición DELETE al endpoint concreto
+      await apiProvider.delete<void>(`/llms/${id}/`);
 
-    // revalidar la lista desde el servidor
-    await mutate();
+      // revalidar la lista desde el servidor
+      await mutate();
+      
+      toaster.create({
+        title: "LLM deleted",
+        description: "The LLM has been successfully deleted.",
+        type: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toaster.create({
+          title: "Error deleting LLM",
+          description: error.message,
+          type: "error",
+          duration: 5000,
+        });
+      } else {
+        toaster.create({
+          title: "Error deleting LLM",
+          description: "An unexpected error occurred. Please try again.",
+          type: "error",
+          duration: 5000,
+        });
+      }
+      console.error("Error deleting LLM:", error);
+    }
 
   };
 
