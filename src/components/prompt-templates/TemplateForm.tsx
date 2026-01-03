@@ -15,14 +15,22 @@ import {
 
 import apiProvider, { ApiError } from "@/providers/api";
 import { toaster } from "@/components/ui/toaster";
-import type { CreatePromptTemplateDto, CreateFeatureDto } from "@/models/promptTemplate";
+import type { CreatePromptTemplateDto, CreateFeatureDto, PromptTemplate } from "@/models/promptTemplate";
 
-export function TemplateForm() {
-  const [schemaJson, setSchemaJson] = useState("");
+interface TemplateFormProps {
+  initialData?: PromptTemplate;
+}
+
+export function TemplateForm({ initialData }: TemplateFormProps) {
+  const [schemaJson, setSchemaJson] = useState(initialData ? JSON.stringify(initialData.system_prompt.schema, null, 2) : "");
   const router = useRouter();
 
-  const [features, setFeatures] = useState<CreateFeatureDto[]>([]);
+  const [features, setFeatures] = useState<CreateFeatureDto[]>(initialData?.user_prompt.features || initialData?.user_prompt.features || []);
   const [newFeature, setNewFeature] = useState<CreateFeatureDto>({ name: "", description: "" });
+  const [name, setName] = useState(initialData?.name || "");
+  const [systemPrompt, setSystemPrompt] = useState(initialData?.system_prompt.text || "");
+  const [userPrompt, setUserPrompt] = useState(initialData?.user_prompt.text || "");
+  const [kValue, setKValue] = useState(initialData?.user_prompt.k?.toString() || "");
 
   const handleCancel = () => {
     router.push("/prompt-templates");
@@ -49,13 +57,6 @@ export function TemplateForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Acceso directo a valores del form
-    const form = e.target as HTMLFormElement;
-    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-    const systemPrompt = (form.elements.namedItem("systemPrompt") as HTMLTextAreaElement).value;
-    const userPrompt = (form.elements.namedItem("userPrompt") as HTMLTextAreaElement).value;
-    const kValue = (form.elements.namedItem("k") as HTMLInputElement).value;
 
     // Construcción del DTO
     const dto: CreatePromptTemplateDto = {
@@ -120,7 +121,12 @@ export function TemplateForm() {
           <Fieldset.Content>
             <Field.Root>
               <Field.Label>Name</Field.Label>
-              <Input name="name" placeholder="Template name" />
+              <Input 
+                name="name" 
+                placeholder="Template name" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </Field.Root>
           </Fieldset.Content>
         </Fieldset.Root>
@@ -142,6 +148,8 @@ export function TemplateForm() {
                   name="systemPrompt"
                   placeholder="System prompt text"
                   rows={5}
+                  value={systemPrompt}
+                  onChange={(e) => setSystemPrompt(e.target.value)}
                 />
               </Field.Root>
 
@@ -180,6 +188,8 @@ export function TemplateForm() {
                 name="userPrompt"
                 placeholder="Recommend {{ k }} apps for {{ feature }}."
                 rows={3}
+                value={userPrompt}
+                onChange={(e) => setUserPrompt(e.target.value)}
               />
             </Field.Root>
             {/* k opcional */}
@@ -189,6 +199,8 @@ export function TemplateForm() {
                 name="k"
                 type="number"
                 placeholder="Number of apps to recommend"
+                value={kValue}
+                onChange={(e) => setKValue(e.target.value)}
               />
             </Field.Root>
 
