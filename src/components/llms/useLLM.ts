@@ -46,7 +46,9 @@ export function useLLMs() {
   };
 
   return {
-    llms: data ?? [],
+    llms: data 
+      ? [...data].sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime())
+      : [],
     isLoading,
     isError: !!error,
     error,

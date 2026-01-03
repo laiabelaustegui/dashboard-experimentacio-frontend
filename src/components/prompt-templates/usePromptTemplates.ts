@@ -48,7 +48,9 @@ export function usePromptTemplates() {
   };
 
   return {
-    templates: data ?? [],
+    templates: data 
+      ? [...data].sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime())
+      : [],
     isLoading,
     isError: !!error,
     error,

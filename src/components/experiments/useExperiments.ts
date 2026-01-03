@@ -46,7 +46,9 @@ export function useExperiments() {
   };
 
   return {
-    experiments: data ?? [],
+    experiments: data 
+      ? [...data].sort((a, b) => new Date(b.execution_date).getTime() - new Date(a.execution_date).getTime())
+      : [],
     isLoading,
     isError: !!error,
     error,

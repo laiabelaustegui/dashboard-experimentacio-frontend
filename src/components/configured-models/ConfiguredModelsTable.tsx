@@ -54,7 +54,10 @@ export const ConfiguredModelsTable = () => {
                 size="sm"
                 variant="ghost"
                 colorScheme="red"
-                onClick={() => deleteConfiguredModel(configuredModel.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteConfiguredModel(configuredModel.id);
+                }}
               >
                 <IoTrash />
               </IconButton>

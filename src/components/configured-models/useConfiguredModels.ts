@@ -46,7 +46,9 @@ export function useConfiguredModels() {
   };
 
   return {
-    configuredModels: data ?? [],
+    configuredModels: data 
+      ? [...data].sort((a, b) => b.id - a.id)
+      : [],
     isLoading,
     isError: !!error,
     error,

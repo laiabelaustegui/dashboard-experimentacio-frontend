@@ -54,7 +54,12 @@ export const TemplatesTable = () => {
             <Table.Cell>{template.name}</Table.Cell>
             <Table.Cell>{template.creation_date.slice(0, 10)}</Table.Cell>
             <Table.Cell textAlign="end">
-              <IconButton aria-label="Edit" size="sm" variant="ghost">
+              <IconButton 
+                aria-label="Edit" 
+                size="sm" 
+                variant="ghost"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <IoPencil />
               </IconButton>
               <IconButton
@@ -62,7 +67,10 @@ export const TemplatesTable = () => {
                 size="sm"
                 variant="ghost"
                 colorPalette="red"
-                onClick={() => deleteTemplate(template.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteTemplate(template.id);
+                }}
               >
                 <IoTrash />
               </IconButton>

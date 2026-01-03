@@ -46,7 +46,9 @@ export function useConfigurations() {
   };
 
   return {
-    configurations: data ?? [],
+    configurations: data 
+      ? [...data].sort((a, b) => b.id - a.id)
+      : [],
     isLoading,
     isError: !!error,
     error,

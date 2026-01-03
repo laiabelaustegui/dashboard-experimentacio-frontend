@@ -54,7 +54,12 @@ export const LlmsTable = () => {
             <Table.Cell>{llm.creation_date.slice(0, 10)}</Table.Cell>
             <Table.Cell>{llm.API_endpoint}</Table.Cell>
             <Table.Cell textAlign="end">
-              <IconButton aria-label="Edit" size="sm" variant="ghost">
+              <IconButton 
+                aria-label="Edit" 
+                size="sm" 
+                variant="ghost"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <IoPencil />
               </IconButton>
               <IconButton
@@ -62,7 +67,10 @@ export const LlmsTable = () => {
                 size="sm"
                 variant="ghost"
                 colorScheme="red"
-                onClick={() => deleteLLM(llm.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteLLM(llm.id);
+                }}
               >
                 <IoTrash />
               </IconButton>
