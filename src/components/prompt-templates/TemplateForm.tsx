@@ -13,7 +13,8 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 
-import apiProvider from "@/providers/api";
+import apiProvider, { ApiError } from "@/providers/api";
+import { toaster } from "@/components/ui/toaster";
 import type { CreatePromptTemplateDto, CreateFeatureDto } from "@/models/promptTemplate";
 
 export function TemplateForm() {
@@ -76,10 +77,31 @@ export function TemplateForm() {
         body: dto,
       });
 
+      toaster.create({
+        title: "Template created",
+        description: "The prompt template has been successfully created.",
+        type: "success",
+        duration: 3000,
+      });
+
       router.push("/prompt-templates");
     } catch (error) {
-      console.error("Error creating template", error);
-      // aquí puedes poner un toast o notificación
+      if (error instanceof ApiError) {
+        toaster.create({
+          title: "Error creating template",
+          description: error.message,
+          type: "error",
+          duration: 5000,
+        });
+      } else {
+        toaster.create({
+          title: "Error creating template",
+          description: "An unexpected error occurred. Please try again.",
+          type: "error",
+          duration: 5000,
+        });
+      }
+      console.error("Error creating template:", error);
     }
   };
 

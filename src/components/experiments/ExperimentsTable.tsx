@@ -61,7 +61,10 @@ export const ExperimentsTable = () => {
                     size="sm"
                     variant="ghost"
                     colorPalette="red"
-                    onClick={() => deleteExperiment(experiment.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteExperiment(experiment.id);
+                    }}
                 >
                     <IoTrash />
                 </IconButton>

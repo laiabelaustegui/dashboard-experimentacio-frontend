@@ -53,7 +53,12 @@ export const ConfigurationsTable = () => {
             <Table.Cell>{configuration.temperature}</Table.Cell>
             <Table.Cell>{configuration.topP}</Table.Cell>
             <Table.Cell textAlign="end">
-              <IconButton aria-label="Edit" size="sm" variant="ghost">
+              <IconButton 
+                aria-label="Edit" 
+                size="sm" 
+                variant="ghost"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <IoPencil />
               </IconButton>
               <IconButton
@@ -61,7 +66,10 @@ export const ConfigurationsTable = () => {
                 size="sm"
                 variant="ghost"
                 colorScheme="red"
-                onClick={() => deleteConfiguration(configuration.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteConfiguration(configuration.id);
+                }}
               >
                 <IoTrash />
               </IconButton>

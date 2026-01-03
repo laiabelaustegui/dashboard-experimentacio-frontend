@@ -22,7 +22,8 @@ import { useRouter } from "next/navigation";
 import type { CreateExperimentDto } from "@/models/experiment";
 import { useConfiguredModels } from "@/components/configured-models/useConfiguredModels";
 import { usePromptTemplates } from "@/components/prompt-templates/usePromptTemplates";
-import apiProvider from "@/providers/api";
+import apiProvider, { ApiError } from "@/providers/api";
+import { toaster } from "@/components/ui/toaster";
 
 export const ExperimentForm = () => {
   const router = useRouter();
@@ -67,9 +68,31 @@ export const ExperimentForm = () => {
         body: dto,
       });
 
+      toaster.create({
+        title: "Experiment created",
+        description: "The experiment has been successfully created.",
+        type: "success",
+        duration: 3000,
+      });
+
       router.push("/experiments");
     } catch (error) {
-      console.error("Error creating experiment", error);
+      if (error instanceof ApiError) {
+        toaster.create({
+          title: "Error creating experiment",
+          description: error.message,
+          type: "error",
+          duration: 5000,
+        });
+      } else {
+        toaster.create({
+          title: "Error creating experiment",
+          description: "An unexpected error occurred. Please try again.",
+          type: "error",
+          duration: 5000,
+        });
+      }
+      console.error("Error creating experiment:", error);
     }
   };
 
