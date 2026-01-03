@@ -15,9 +15,9 @@ import {
   Stack,
   Text,
   useFilter,
-  useListCollection,
+  createListCollection,
 } from "@chakra-ui/react";
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { CreateExperimentDto } from "@/models/experiment";
 import { useConfiguredModels } from "@/components/configured-models/useConfiguredModels";
@@ -35,20 +35,20 @@ export const ExperimentForm = () => {
   const { configuredModels, isLoading: loadingModels } = useConfiguredModels();
   const { templates, isLoading: loadingPrompts } = usePromptTemplates();
 
- // 2) Colección
-  const items = configuredModels.map((model) => ({
-    label: model.short_name,
-    value: String(model.id),
-  }));
-
   const { contains } = useFilter({ sensitivity: "base" });
 
-  const { collection } = useListCollection({
-    initialItems: items,
-    itemToString: (item) => item.label,
-    itemToValue: (item) => item.value,
-    filter: contains,
-  });
+  // Create collection with dynamic items
+  const collection = useMemo(() => 
+    createListCollection({
+      items: configuredModels.map((model) => ({
+        label: model.short_name,
+        value: String(model.id),
+      })),
+      itemToString: (item) => item.label,
+      itemToValue: (item) => item.value,
+    }),
+    [configuredModels]
+  );
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -97,7 +97,7 @@ export const ExperimentForm = () => {
   };
 
   /// 3) selectedItems para los chips
-  const selectedItems = items.filter((it) =>
+  const selectedItems = collection.items.filter((it) =>
     selectedModelIds.includes(it.value),
   );
 
@@ -188,7 +188,7 @@ export const ExperimentForm = () => {
 
                 <Combobox.Positioner>
                   <Combobox.Content>
-                    {items.map((item) => (
+                    {collection.items.map((item) => (
                       <Combobox.Item key={item.value} item={item}>
                         {item.label}
                       </Combobox.Item>
