@@ -1,12 +1,12 @@
 "use client";
 
 import { CacheProvider } from "@emotion/react";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { createEmotionCache } from "@/lib/emotion-cache";
 
-export function EmotionProvider({ children }: { children: ReactNode }) {
-  // Creamos el cache una sola vez por cliente
-  const [cache] = useState(() => createEmotionCache());
+// Crear el cache fuera del componente para evitar problemas de hidratación
+const cache = createEmotionCache();
 
+export function EmotionProvider({ children }: { children: ReactNode }) {
   return <CacheProvider value={cache}>{children}</CacheProvider>;
 }

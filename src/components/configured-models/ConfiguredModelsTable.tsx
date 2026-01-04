@@ -26,7 +26,7 @@ export const ConfiguredModelsTable = () => {
     filteredAndSortedData: filteredAndSortedModels,
   } = useTableFilters({
     data: configuredModels || [],
-    searchFields: ["short_name"],
+    searchFields: ["short_name", "llm_name"],
     defaultSortField: "short_name",
     defaultSortOrder: "asc",
   });
@@ -54,11 +54,13 @@ export const ConfiguredModelsTable = () => {
       <TableFilters
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search by short name..."
+        searchPlaceholder="Search by name or base model..."
         sortField={String(sortField)}
         onSortFieldChange={(value) => setSortField(value as keyof typeof filteredAndSortedModels[0])}
         sortOptions={[
           { value: "short_name", label: "Sort by Name" },
+          { value: "llm_name", label: "Sort by Base Model" },
+          { value: "temperature", label: "Sort by Temperature" },
         ]}
         sortOrder={sortOrder}
         onSortOrderToggle={toggleSortOrder}
@@ -75,13 +77,19 @@ export const ConfiguredModelsTable = () => {
           <Table.Header>
             <Table.Row>
               <Table.ColumnHeader>Short Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Base Model</Table.ColumnHeader>
+              <Table.ColumnHeader>Temperature</Table.ColumnHeader>
+              <Table.ColumnHeader>Top P</Table.ColumnHeader>
               <Table.ColumnHeader textAlign="end">Actions</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {filteredAndSortedModels.map((configuredModel) => (
               <Table.Row key={configuredModel.id}>
-                <Table.Cell>{configuredModel.short_name}</Table.Cell>
+                <Table.Cell fontWeight="medium">{configuredModel.short_name}</Table.Cell>
+                <Table.Cell color="fg.muted">{configuredModel.llm_name}</Table.Cell>
+                <Table.Cell>{configuredModel.temperature}</Table.Cell>
+                <Table.Cell>{configuredModel.topP ?? "—"}</Table.Cell>
                 <Table.Cell textAlign="end">
                   <IconButton
                     aria-label="Delete"

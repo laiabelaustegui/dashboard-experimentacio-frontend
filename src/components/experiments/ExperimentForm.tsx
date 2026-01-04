@@ -17,7 +17,7 @@ import {
   useFilter,
   createListCollection,
 } from "@chakra-ui/react";
-import { useState, FormEvent, useMemo } from "react";
+import { useState, FormEvent, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { CreateExperimentDto } from "@/models/experiment";
 import { useConfiguredModels } from "@/components/configured-models/useConfiguredModels";
@@ -31,11 +31,26 @@ export const ExperimentForm = () => {
   const [promptTemplateId, setPromptTemplateId] = useState<number | "">("");
   const [selectedModelIds, setSelectedModelIds] = useState<string[]>([]);
   const [numRuns, setNumRuns] = useState("1");
+  const [isExecuting, setIsExecuting] = useState(false);
 
   const { configuredModels, isLoading: loadingModels } = useConfiguredModels();
   const { templates, isLoading: loadingPrompts } = usePromptTemplates();
 
   const { contains } = useFilter({ sensitivity: "base" });
+
+  // Advertir al usuario si intenta salir durante la ejecución
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isExecuting) {
+        e.preventDefault();
+        e.returnValue = "The experiment is still running. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isExecuting]);
 
   // Create collection with dynamic items
   const collection = useMemo(() => 
@@ -62,6 +77,7 @@ export const ExperimentForm = () => {
 
     console.log("Submitting experiment:", dto);
 
+    setIsExecuting(true);
     try {
       await apiProvider.post({
         path: "/experiments/",
@@ -93,6 +109,8 @@ export const ExperimentForm = () => {
         });
       }
       console.error("Error creating experiment:", error);
+    } finally {
+      setIsExecuting(false);
     }
   };
 
@@ -249,10 +267,20 @@ export const ExperimentForm = () => {
       </Flex>
 
       <Flex justify="flex-end" mt={8} gap={3}>
-        <Button type="button" variant="outline">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={() => router.push("/experiments")}
+          disabled={isExecuting}
+        >
           Cancel
         </Button>
-        <Button type="submit" colorPalette="teal">
+        <Button 
+          type="submit" 
+          colorPalette="teal"
+          loading={isExecuting}
+          loadingText="Executing..."
+        >
           Execute
         </Button>
       </Flex>
