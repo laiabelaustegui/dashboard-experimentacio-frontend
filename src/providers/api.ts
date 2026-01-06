@@ -27,10 +27,43 @@ class ApiProvider {
         if (axios.isAxiosError(error)) {
             const axiosError = error as AxiosError;
             const statusCode = axiosError.response?.status || 500;
-            const message = axiosError.response?.data?.message || 
-                           axiosError.response?.data?.error || 
-                           axiosError.message || 
-                           'An unexpected error occurred';
+            
+            // Extract error message from various possible locations
+            const responseData = axiosError.response?.data as any;
+            let message = 'An unexpected error occurred';
+            
+            if (responseData) {
+                // Check for non_field_errors (Django REST Framework validation errors)
+                if (responseData.non_field_errors && Array.isArray(responseData.non_field_errors)) {
+                    message = responseData.non_field_errors.join(', ');
+                }
+                // Check for specific error messages
+                else if (responseData.message) {
+                    message = responseData.message;
+                }
+                else if (responseData.error) {
+                    message = responseData.error;
+                }
+                // Check for field-specific errors
+                else if (typeof responseData === 'object') {
+                    const fieldErrors = Object.entries(responseData)
+                        .filter(([key]) => key !== 'detail')
+                        .map(([key, value]) => {
+                            if (Array.isArray(value)) {
+                                return `${key}: ${value.join(', ')}`;
+                            }
+                            return `${key}: ${value}`;
+                        });
+                    if (fieldErrors.length > 0) {
+                        message = fieldErrors.join('; ');
+                    }
+                }
+            }
+            
+            // Fallback to axios error message
+            if (message === 'An unexpected error occurred' && axiosError.message) {
+                message = axiosError.message;
+            }
             
             throw new ApiError(statusCode, message, axiosError.response?.data);
         }

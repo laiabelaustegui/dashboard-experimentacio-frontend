@@ -21,7 +21,7 @@ export function usePromptTemplates() {
       // Mostrar mensaje de éxito
       toaster.create({
         title: "Template deleted",
-        description: "The prompt template has been successfully deleted.",
+        description: "The prompt template and all associated experiments have been successfully deleted.",
         type: "success",
         duration: 3000,
       });
@@ -47,6 +47,10 @@ export function usePromptTemplates() {
 
   };
 
+  const getTemplate = (id: number): PromptTemplate | undefined => {
+    return data?.find((template) => template.id === id);
+  };
+
   return {
     templates: data 
       ? [...data].sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime())
@@ -55,6 +59,7 @@ export function usePromptTemplates() {
     isError: !!error,
     error,
     deleteTemplate,
+    getTemplate,
   };
 }
 
