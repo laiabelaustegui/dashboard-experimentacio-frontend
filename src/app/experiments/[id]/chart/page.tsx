@@ -118,12 +118,12 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
             enabled: true,
             formatter: (val: number) => val.toFixed(2),
             style: {
-              colors: ['#000000'],
+              colors: ['#ffffff'],
               fontSize: '12px',
               fontWeight: 'bold',
             },
           },
-          colors: ["#FFEB3B"],
+          colors: ["#18392b"],
           xaxis: {
             categories: allRanks.map(rank => `${rank}`),
             title: {
@@ -149,6 +149,39 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
             text: "Higher values indicate more consistent app rankings across runs",
             align: "center" as const,
           },
+          legend: {
+            show: true,
+            position: "top" as const,
+            horizontalAlign: "center" as const,
+            floating: false,
+            fontSize: '13px',
+            fontWeight: 500,
+            customLegendItems: [
+              'Very Low (0.0 - 0.2)',
+              'Low (0.2 - 0.4)',
+              'Medium (0.4 - 0.6)',
+              'High (0.6 - 0.8)',
+              'Very High (0.8 - 1.0)'
+            ],
+            markers: {
+              size: 12,
+              shape: 'square' as const,
+              fillColors: ['#d0ded8', '#a5bfb4', '#85aa9b', '#588b76', '#18392b'],
+            },
+            itemMargin: {
+              horizontal: 12,
+              vertical: 5,
+            },
+            onItemClick: {
+              toggleDataSeries: false,
+            },
+            offsetY: -10,
+          },
+          grid: {
+            padding: {
+              top: 40,
+            },
+          },
           plotOptions: {
             heatmap: {
               shadeIntensity: 0.5,
@@ -162,31 +195,31 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
                   {
                     from: 0,
                     to: 0.2,
-                    color: '#FDD835',
+                    color: '#d0ded8',
                     name: 'Very Low',
                   },
                   {
                     from: 0.2,
                     to: 0.4,
-                    color: '#FBC02D',
+                    color: '#a5bfb4',
                     name: 'Low',
                   },
                   {
                     from: 0.4,
                     to: 0.6,
-                    color: '#66BB6A',
+                    color: '#85aa9b',
                     name: 'Medium',
                   },
                   {
                     from: 0.6,
                     to: 0.8,
-                    color: '#42A5F5',
+                    color: '#588b76',
                     name: 'High',
                   },
                   {
                     from: 0.8,
                     to: 1,
-                    color: '#1565C0',
+                    color: '#18392b',
                     name: 'Very High',
                   },
                 ],
@@ -257,12 +290,12 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
           dataLabels: {
             enabled: true,
             style: {
-              colors: ['#000000'],
+              colors: ['#ffffff'],
               fontSize: '12px',
               fontWeight: 'bold',
             },
           },
-          colors: ["#FFEB3B"],
+          colors: ["#18392b"],
           xaxis: {
             categories: allRanks.map(rank => `${rank}`),
             title: {
@@ -284,6 +317,39 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
             text: `App Frequency by Ranking Position - ${featureName}`,
             align: "center" as const,
           },
+          legend: {
+            show: true,
+            position: "top" as const,
+            horizontalAlign: "center" as const,
+            floating: false,
+            fontSize: '13px',
+            fontWeight: 500,
+            customLegendItems: [
+              `Very Low (0 - ${Math.floor(maxFrequency * 0.2)})`,
+              `Low (${Math.floor(maxFrequency * 0.2)} - ${Math.floor(maxFrequency * 0.4)})`,
+              `Medium (${Math.floor(maxFrequency * 0.4)} - ${Math.floor(maxFrequency * 0.6)})`,
+              `High (${Math.floor(maxFrequency * 0.6)} - ${Math.floor(maxFrequency * 0.8)})`,
+              `Very High (${Math.floor(maxFrequency * 0.8)} - ${maxFrequency})`
+            ],
+            markers: {
+              size: 12,
+              shape: 'square' as const,
+              fillColors: ['#d0ded8', '#a5bfb4', '#85aa9b', '#588b76', '#18392b'],
+            },
+            itemMargin: {
+              horizontal: 12,
+              vertical: 5,
+            },
+            onItemClick: {
+              toggleDataSeries: false,
+            },
+            offsetY: -10,
+          },
+          grid: {
+            padding: {
+              top: 40,
+            },
+          },
           plotOptions: {
             heatmap: {
               shadeIntensity: 0.5,
@@ -297,31 +363,31 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
                   {
                     from: 0,
                     to: maxFrequency * 0.2,
-                    color: '#FDD835',
+                    color: '#d0ded8',
                     name: 'Very Low',
                   },
                   {
                     from: maxFrequency * 0.2,
                     to: maxFrequency * 0.4,
-                    color: '#FBC02D',
+                    color: '#a5bfb4',
                     name: 'Low',
                   },
                   {
                     from: maxFrequency * 0.4,
                     to: maxFrequency * 0.6,
-                    color: '#66BB6A',
+                    color: '#85aa9b',
                     name: 'Medium',
                   },
                   {
                     from: maxFrequency * 0.6,
                     to: maxFrequency * 0.8,
-                    color: '#42A5F5',
+                    color: '#588b76',
                     name: 'High',
                   },
                   {
                     from: maxFrequency * 0.8,
                     to: maxFrequency,
-                    color: '#1565C0',
+                    color: '#18392b',
                     name: 'Very High',
                   },
                 ],

@@ -14,6 +14,7 @@ export type PromptTemplate = {
     id: number;
     name: string;
     creation_date: string;
+    experiments_count?: number; // Number of experiments using this template
     system_prompt: {
       text: string;
       schema: unknown; // fichero JSON completo
