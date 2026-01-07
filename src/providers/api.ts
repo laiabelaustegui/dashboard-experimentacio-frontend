@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, AxiosError } from 'axios';
 import { toaster } from '@/components/ui/toaster';
 
-const BASE_URL = 'http://127.0.0.1:8000/';
+const BASE_URL = 'http://127.0.0.1:8000/api/';
 
 export class ApiError extends Error {
     constructor(
