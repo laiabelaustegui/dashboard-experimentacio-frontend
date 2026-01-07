@@ -10,7 +10,9 @@ import {
   Stack,
   Badge,
   SimpleGrid,
+  Button,
 } from "@chakra-ui/react";
+import Link from "next/link";
 import { usePromptTemplate } from "./usePromptTemplate";
 
 
@@ -40,6 +42,16 @@ export default function TemplateDetails({ id }: { id: number }) {
 
   return (
     <Flex direction="column" gap={4} p={4} w="full" mb={8}>
+      <Button 
+        as={Link} 
+        href="/prompt-templates" 
+        variant="ghost" 
+        alignSelf="flex-start"
+        mb={2}
+      >
+        ← Back to Prompt Templates
+      </Button>
+      
       <Flex justify="space-between" align="center">
         <Heading as="h1" size="lg">
           {promptTemplate.name}

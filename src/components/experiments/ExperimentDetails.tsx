@@ -12,6 +12,7 @@ import {
   Dialog,
   Portal,
 } from "@chakra-ui/react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useExperiment } from "./useExperiment";
 import ChartConfigModal from "./charts/ChartConfigModal";
@@ -148,6 +149,16 @@ export default function ExperimentDetails({ id }: { id: number }) {
 
   return (
     <Flex direction="column" gap={4} p={4} w="full" mb={8}>
+      <Button 
+        as={Link} 
+        href="/experiments" 
+        variant="ghost" 
+        alignSelf="flex-start"
+        mb={2}
+      >
+        ← Back to Experiments
+      </Button>
+      
       <Flex justify="space-between" align="center">
         <Heading as="h1" size="lg">
           {experiment.name}
