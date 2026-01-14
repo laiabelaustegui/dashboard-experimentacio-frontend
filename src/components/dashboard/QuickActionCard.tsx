@@ -18,7 +18,7 @@ export function QuickActionCard({ title, actions }: QuickActionCardProps) {
   return (
     <Card.Root>
       <Card.Body>
-        <Heading size="sm" mb={3}>
+        <Heading size="lg" mb={3}>
           {title}
         </Heading>
         <Stack direction="row" gap={2} wrap="wrap">

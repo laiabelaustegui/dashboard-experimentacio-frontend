@@ -197,14 +197,14 @@ export const ExperimentForm = () => {
                                     <>
                                       <Stack gap={0} align="flex-end">
                                         <Text fontSize="xs" color="fg.muted">Temperature</Text>
-                                        <Badge colorPalette="blue" variant="subtle" size="sm">
+                                        <Badge colorPalette="teal" variant="subtle" size="sm">
                                           {model.temperature}
                                         </Badge>
                                       </Stack>
                                       {model.topP !== null && (
                                         <Stack gap={0} align="flex-end">
                                           <Text fontSize="xs" color="fg.muted">Top P</Text>
-                                          <Badge colorPalette="purple" variant="subtle" size="sm">
+                                          <Badge colorPalette="teal" variant="outline" size="sm">
                                             {model.topP}
                                           </Badge>
                                         </Stack>
@@ -382,8 +382,8 @@ export const ExperimentForm = () => {
                                     {selectedTemplate.user_prompt.features.map((feature) => (
                                       <Badge 
                                         key={feature.id} 
-                                        colorPalette="purple" 
-                                        variant="subtle" 
+                                        colorPalette="teal" 
+                                        variant="outline" 
                                         size="sm"
                                         title={feature.description}
                                       >

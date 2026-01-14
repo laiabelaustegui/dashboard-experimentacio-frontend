@@ -42,15 +42,15 @@ export default function TemplateDetails({ id }: { id: number }) {
 
   return (
     <Flex direction="column" gap={4} p={4} w="full" mb={8}>
-      <Button 
-        as={Link} 
-        href="/prompt-templates" 
-        variant="ghost" 
-        alignSelf="flex-start"
-        mb={2}
-      >
-        ← Back to Prompt Templates
-      </Button>
+      <Link href="/prompt-templates" style={{ alignSelf: "flex-start" }}>
+        <Button 
+          as="span"
+          variant="ghost"
+          mb={2}
+        >
+          ← Back to Prompt Templates
+        </Button>
+      </Link>
       
       <Flex justify="space-between" align="center">
         <Heading as="h1" size="lg">
@@ -136,7 +136,7 @@ export default function TemplateDetails({ id }: { id: number }) {
               {promptTemplate.user_prompt.features.map((feature) => (
                 <Badge
                   key={feature.id}
-                  colorPalette="blue"
+                  colorPalette="teal"
                   size="lg"
                   px={3}
                   py={1}

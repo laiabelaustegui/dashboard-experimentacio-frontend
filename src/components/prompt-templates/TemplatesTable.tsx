@@ -156,7 +156,7 @@ export const TemplatesTable = () => {
                     aria-label="Duplicate" 
                     size="sm" 
                     variant="ghost"
-                    colorPalette="blue"
+                    colorPalette="teal"
                     onClick={(e) => handleDuplicateClick(e, template.id)}
                   >
                     <IoCopy />

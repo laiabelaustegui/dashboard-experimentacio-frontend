@@ -271,7 +271,7 @@ export function TemplateForm({ initialData }: TemplateFormProps) {
 
         <Stack alignSelf="flex-start">
           <ButtonGroup gap={4}>
-            <Button type="submit" colorPalette="blue">
+            <Button type="submit" colorPalette="teal">
               Submit
             </Button>
             <Button variant="outline" onClick={handleCancel}>

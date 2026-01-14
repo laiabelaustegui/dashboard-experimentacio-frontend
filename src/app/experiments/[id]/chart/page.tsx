@@ -123,7 +123,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
               fontWeight: 'bold',
             },
           },
-          colors: ["#18392b"],
+          colors: ["#004c4c"],
           xaxis: {
             categories: allRanks.map(rank => `${rank}`),
             title: {
@@ -195,31 +195,31 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
                   {
                     from: 0,
                     to: 0.2,
-                    color: '#d0ded8',
+                    color: '#66b2b2',
                     name: 'Very Low',
                   },
                   {
                     from: 0.2,
                     to: 0.4,
-                    color: '#a5bfb4',
+                    color: '#008080',
                     name: 'Low',
                   },
                   {
                     from: 0.4,
                     to: 0.6,
-                    color: '#85aa9b',
+                    color: '#006666',
                     name: 'Medium',
                   },
                   {
                     from: 0.6,
                     to: 0.8,
-                    color: '#588b76',
+                    color: '#004c4c',
                     name: 'High',
                   },
                   {
                     from: 0.8,
                     to: 1,
-                    color: '#18392b',
+                    color: '#003333',
                     name: 'Very High',
                   },
                 ],
@@ -295,7 +295,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
               fontWeight: 'bold',
             },
           },
-          colors: ["#18392b"],
+          colors: ["#004c4c"],
           xaxis: {
             categories: allRanks.map(rank => `${rank}`),
             title: {
@@ -334,7 +334,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
             markers: {
               size: 12,
               shape: 'square' as const,
-              fillColors: ['#d0ded8', '#a5bfb4', '#85aa9b', '#588b76', '#18392b'],
+              fillColors: ['#66b2b2', '#008080', '#006666', '#004c4c', '#003333'],
             },
             itemMargin: {
               horizontal: 12,
@@ -363,31 +363,31 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
                   {
                     from: 0,
                     to: maxFrequency * 0.2,
-                    color: '#d0ded8',
+                    color: '#66b2b2',
                     name: 'Very Low',
                   },
                   {
                     from: maxFrequency * 0.2,
                     to: maxFrequency * 0.4,
-                    color: '#a5bfb4',
+                    color: '#008080',
                     name: 'Low',
                   },
                   {
                     from: maxFrequency * 0.4,
                     to: maxFrequency * 0.6,
-                    color: '#85aa9b',
+                    color: '#006666',
                     name: 'Medium',
                   },
                   {
                     from: maxFrequency * 0.6,
                     to: maxFrequency * 0.8,
-                    color: '#588b76',
+                    color: '#004c4c',
                     name: 'High',
                   },
                   {
                     from: maxFrequency * 0.8,
                     to: maxFrequency,
-                    color: '#18392b',
+                    color: '#003333',
                     name: 'Very High',
                   },
                 ],
