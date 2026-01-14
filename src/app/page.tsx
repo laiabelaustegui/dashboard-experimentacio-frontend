@@ -9,7 +9,7 @@ export default function HomePage() {
     <Flex direction="column" gap={8} p={4} w="full">
       <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
         <QuickActionCard
-          title="Large Language Models (LLMs)"
+          title="Large Language Models (LLM)"
           actions={[
             { href: "/llms/new", label: "Add new model", props: { colorPalette: "teal" } },
             { href: "/llms", label: "See models", props: { variant: "outline" } },

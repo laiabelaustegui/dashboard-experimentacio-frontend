@@ -28,7 +28,7 @@ export default function SideBar() {
         _hover={{ bg: "bg.subtle" }}
         borderRadius="md"
       >
-        <IoMenu color="var(--chakra-colors-blue-400)" />
+        <IoMenu color="var(--chakra-colors-teal-500)" />
       </Flex>
 
       <Link expanded={isOpen} href="/" icon={<IoSpeedometerOutline />} title="Dashboard" />

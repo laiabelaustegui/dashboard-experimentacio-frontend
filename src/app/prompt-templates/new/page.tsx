@@ -40,7 +40,7 @@ export default function NewPromptTemplatePage() {
   }
 
   return (
-    <Flex direction="column" gap={4} p={4} w="full">
+    <Flex direction="column" align="center" p={4} w="full">
         <TemplateForm initialData={initialData} />
     </Flex>
     );

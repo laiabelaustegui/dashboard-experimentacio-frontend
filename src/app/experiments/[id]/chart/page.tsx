@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -123,7 +124,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
               fontWeight: 'bold',
             },
           },
-          colors: ["#18392b"],
+          colors: ["#004c4c"],
           xaxis: {
             categories: allRanks.map(rank => `${rank}`),
             title: {
@@ -195,31 +196,31 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
                   {
                     from: 0,
                     to: 0.2,
-                    color: '#d0ded8',
+                    color: '#66b2b2',
                     name: 'Very Low',
                   },
                   {
                     from: 0.2,
                     to: 0.4,
-                    color: '#a5bfb4',
+                    color: '#008080',
                     name: 'Low',
                   },
                   {
                     from: 0.4,
                     to: 0.6,
-                    color: '#85aa9b',
+                    color: '#006666',
                     name: 'Medium',
                   },
                   {
                     from: 0.6,
                     to: 0.8,
-                    color: '#588b76',
+                    color: '#004c4c',
                     name: 'High',
                   },
                   {
                     from: 0.8,
                     to: 1,
-                    color: '#18392b',
+                    color: '#003333',
                     name: 'Very High',
                   },
                 ],
@@ -295,7 +296,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
               fontWeight: 'bold',
             },
           },
-          colors: ["#18392b"],
+          colors: ["#004c4c"],
           xaxis: {
             categories: allRanks.map(rank => `${rank}`),
             title: {
@@ -334,7 +335,7 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
             markers: {
               size: 12,
               shape: 'square' as const,
-              fillColors: ['#d0ded8', '#a5bfb4', '#85aa9b', '#588b76', '#18392b'],
+              fillColors: ['#66b2b2', '#008080', '#006666', '#004c4c', '#003333'],
             },
             itemMargin: {
               horizontal: 12,
@@ -363,31 +364,31 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
                   {
                     from: 0,
                     to: maxFrequency * 0.2,
-                    color: '#d0ded8',
+                    color: '#66b2b2',
                     name: 'Very Low',
                   },
                   {
                     from: maxFrequency * 0.2,
                     to: maxFrequency * 0.4,
-                    color: '#a5bfb4',
+                    color: '#008080',
                     name: 'Low',
                   },
                   {
                     from: maxFrequency * 0.4,
                     to: maxFrequency * 0.6,
-                    color: '#85aa9b',
+                    color: '#006666',
                     name: 'Medium',
                   },
                   {
                     from: maxFrequency * 0.6,
                     to: maxFrequency * 0.8,
-                    color: '#588b76',
+                    color: '#004c4c',
                     name: 'High',
                   },
                   {
                     from: maxFrequency * 0.8,
                     to: maxFrequency,
-                    color: '#18392b',
+                    color: '#003333',
                     name: 'Very High',
                   },
                 ],
@@ -580,19 +581,72 @@ function ChartPageContent({ experimentId }: { experimentId: string }) {
       {/* Info about selected runs */}
       <Card.Root>
         <Card.Body>
-          <Heading as="h2" size="md" mb={3}>
-            Selected Runs
+          <Heading as="h2" size="md" mb={4}>
+            Selected Runs ({selectedRuns.length})
           </Heading>
-          <Flex direction="column" gap={2}>
-            {selectedRuns.map((run) => (
-              <Flex key={run.id} justify="space-between" py={2} borderBottomWidth="1px">
-                <Text>
-                  Run #{experiment.runs.findIndex((r) => r.id === run.id) + 1} (ID: {run.id})
-                </Text>
-                <Text color="fg.muted">
-                  {run.configured_model.short_name} - {run.elapsed_time.toFixed(2)}s
-                </Text>
-              </Flex>
+          <Flex direction="column" gap={3}>
+            {selectedRuns.map((run, index) => (
+              <Card.Root 
+                key={run.id}
+                size="sm"
+                variant="subtle"
+                borderWidth="1px"
+              >
+                <Card.Body>
+                  <Flex direction="column" gap={3}>
+                    <Flex justify="space-between" align="center">
+                      <Text fontWeight="semibold">
+                        Run #{experiment.runs.findIndex((r) => r.id === run.id) + 1}
+                      </Text>
+                      <Text fontSize="sm" color="fg.muted">
+                        ID: {run.id}
+                      </Text>
+                    </Flex>
+                    <Flex gap={4} wrap="wrap">
+                      <Box>
+                        <Text fontSize="xs" color="fg.muted">Model</Text>
+                        <Text fontSize="sm" fontWeight="medium">{run.configured_model.short_name}</Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="xs" color="fg.muted">Feature</Text>
+                        <Text fontSize="sm" fontWeight="medium">{run.feature.name}</Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="xs" color="fg.muted">Execution Time</Text>
+                        <Text fontSize="sm" fontWeight="medium">{run.elapsed_time.toFixed(2)}s</Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="xs" color="fg.muted">Apps Ranked</Text>
+                        <Text fontSize="sm" fontWeight="medium">{run.mobile_app_rankings.length}</Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="xs" color="fg.muted">Criteria Generated</Text>
+                        <Text fontSize="sm" fontWeight="medium">{run.ranking_criteria.length}</Text>
+                      </Box>
+                    </Flex>
+                    {/* Ranking */}
+                    <Box>
+                      <Text fontSize="xs" color="fg.muted" mb={2}>Ranking</Text>
+                      <Flex gap={1.5} wrap="wrap">
+                        {run.mobile_app_rankings
+                          .sort((a, b) => a.rank - b.rank)
+                          .map((ranking) => (
+                            <Badge
+                              key={ranking.id}
+                              colorPalette={ranking.rank === 1 ? "teal" : "gray"}
+                              variant={ranking.rank === 1 ? "solid" : "subtle"}
+                              size="sm"
+                              px={2}
+                              py={1}
+                            >
+                              #{ranking.rank} {ranking.mobile_app}
+                            </Badge>
+                          ))}
+                      </Flex>
+                    </Box>
+                  </Flex>
+                </Card.Body>
+              </Card.Root>
             ))}
           </Flex>
         </Card.Body>

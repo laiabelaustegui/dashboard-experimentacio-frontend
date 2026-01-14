@@ -19,7 +19,7 @@ export default function Link({ href, title, icon, expanded }: LinkProps) {
           transition="background 0.2s"
         >
             <Flex align="center" gap={4} w="100%">
-                <Flex color="blue.400" fontSize="xl">
+                <Flex color="teal.500" fontSize="xl">
                     {icon}
                 </Flex>
                 {expanded && (

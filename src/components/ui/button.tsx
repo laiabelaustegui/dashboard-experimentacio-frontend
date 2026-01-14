@@ -14,7 +14,7 @@ export const CreateNewButton = ({ href, label }: CreateNewButtonProps) => {
     <NextLink href={href}>
       <Button
         as="span"
-        colorScheme="teal"
+        colorPalette="teal"
         size="sm"
       >
         {label}
