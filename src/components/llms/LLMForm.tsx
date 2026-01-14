@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
-  ButtonGroup,
+  Card,
   Field,
   Fieldset,
   Input,
@@ -18,6 +18,7 @@ import { CreateLLMDto } from "@/models/LLM";
 
 export function LLMForm() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCancel = () => {
     router.push("/llms");
@@ -41,6 +42,7 @@ export function LLMForm() {
         API_key
     };
 
+    setIsSubmitting(true);
     try {
       await apiProvider.post({
         path: "/llms/",
@@ -72,67 +74,103 @@ export function LLMForm() {
         });
       }
       console.error("Error adding LLM:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Stack gap={6} maxW="2xl">
-        {/* Template details */}
-        <Fieldset.Root size="lg">
-          <Stack mb={2}>
-            <Fieldset.Legend>Register New Base Model</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Provide complete the following details to add a new LLM base model.
-            </Fieldset.HelperText>
-          </Stack>
+    <Card.Root
+      asChild
+      maxW="5xl"
+      mx="auto"
+      mt={8}
+      variant="elevated"
+    >
+      <form onSubmit={handleSubmit}>
+        <Card.Header>
+          <Card.Title fontSize="2xl">Register New Base Model</Card.Title>
+          <Card.Description mt={2} color="fg.muted">
+            Please complete the following details to add a new LLM base model.
+          </Card.Description>
+        </Card.Header>
+        
+        <Card.Body>
+          <Fieldset.Root size="lg" colorPalette="teal">
+            <Stack gap={4}>
+              <Fieldset.Legend fontSize="lg" fontWeight="semibold">Model Information</Fieldset.Legend>
+              <Fieldset.HelperText color="fg.muted">
+                Provide the essential information for the new base model.
+              </Fieldset.HelperText>
+            </Stack>
 
-            <Fieldset.Content>
-                <Field.Root>
-                <Field.Label>Name</Field.Label>
-                <Input name="name" placeholder="Model name" />
-                </Field.Root>
+            <Fieldset.Content mt={6}>
+              <Field.Root>
+                <Field.Label fontWeight="medium">Name</Field.Label>
+                <Input 
+                  name="name" 
+                  placeholder="Enter model name" 
+                  size="md"
+                  required
+                />
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label fontWeight="medium">Provider</Field.Label>
+                <Input 
+                  name="provider" 
+                  placeholder="Enter provider name (e.g., OpenAI, Anthropic)" 
+                  size="md"
+                  required
+                />
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label fontWeight="medium">API Endpoint</Field.Label>
+                <Input 
+                  name="API_endpoint" 
+                  placeholder="https://api.example.com/v1" 
+                  size="md"
+                  required
+                />
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label fontWeight="medium">API Key</Field.Label>
+                <Textarea
+                  name="API_key"
+                  placeholder="Enter your API key"
+                  rows={3}
+                  resize="vertical"
+                  size="md"
+                  required
+                />
+              </Field.Root>
             </Fieldset.Content>
+          </Fieldset.Root>
+        </Card.Body>
 
-            <Fieldset.Content>
-                <Field.Root>
-                    <Field.Label>Provider</Field.Label>
-                    <Input name="provider" placeholder="Model provider" />
-                </Field.Root>
-            </Fieldset.Content>
-
-            <Fieldset.Content>
-                <Field.Root>
-                    <Field.Label>API Endpoint</Field.Label>
-                    <Input name="API_endpoint" placeholder="https://api.example.com/v1" />
-                </Field.Root>
-            </Fieldset.Content>
-
-            <Fieldset.Content>
-                <Field.Root>
-                    <Field.Label>API Key</Field.Label>
-                    <Textarea
-                    name="API_key"
-                    placeholder="Your API key"
-                    rows={3}          // 1–2 líneas
-                    resize="vertical" // o "none" si no quieres que se redimensione
-                    />
-                </Field.Root>
-            </Fieldset.Content>
-
-        </Fieldset.Root>
-
-        <Stack alignSelf="flex-start">
-          <ButtonGroup gap={4}>
-            <Button type="submit" colorScheme="blue">
-              Submit
-            </Button>
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </ButtonGroup>
-        </Stack>
-      </Stack>
-    </form>
+        <Card.Footer justifyContent="flex-end" gap={3}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="lg"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            colorPalette="teal"
+            size="lg"
+            loading={isSubmitting}
+            loadingText="Adding model..."
+          >
+            Add Model
+          </Button>
+        </Card.Footer>
+      </form>
+    </Card.Root>
   );
 }

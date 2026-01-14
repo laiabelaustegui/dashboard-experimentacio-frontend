@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, AxiosError } from 'axios';
 import { toaster } from '@/components/ui/toaster';
 
-const BASE_URL = 'http://127.0.0.1:8000/';
+const BASE_URL = 'http://127.0.0.1:8000/api/';
 
 export class ApiError extends Error {
     constructor(
@@ -99,6 +99,25 @@ class ApiProvider {
     }): Promise<T> {
         try {
             const response = await this.axiosInstance.post<T>(path, body, {
+                ...options,
+            });
+            return response.data;
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
+    public async put<T, D>({
+        body = undefined,
+        path,
+        options = {},
+    }: {
+        body?: D;
+        options?: AxiosRequestConfig<D>;
+        path: string;
+    }): Promise<T> {
+        try {
+            const response = await this.axiosInstance.put<T>(path, body, {
                 ...options,
             });
             return response.data;
