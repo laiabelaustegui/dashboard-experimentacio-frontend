@@ -21,7 +21,7 @@ import {
 import { LuX } from "react-icons/lu";
 import { useState, FormEvent, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { CreateExperimentDto } from "@/models/experiment";
+import type { CreateExperimentDto, Experiment } from "@/models/experiment";
 import { useConfiguredModels } from "@/components/configured-models/useConfiguredModels";
 import { usePromptTemplates } from "@/components/prompt-templates/usePromptTemplates";
 import apiProvider, { ApiError } from "@/providers/api";
@@ -81,7 +81,7 @@ export const ExperimentForm = () => {
 
     setIsExecuting(true);
     try {
-      await apiProvider.post({
+      const response = await apiProvider.post<{ experiment: Experiment; num_runs: number }>({
         path: "/experiments/",
         body: dto,
       });
@@ -93,7 +93,7 @@ export const ExperimentForm = () => {
         duration: 3000,
       });
 
-      router.push("/experiments");
+      router.push(`/experiments/${response.experiment.id}`);
     } catch (error) {
       if (error instanceof ApiError) {
         toaster.create({

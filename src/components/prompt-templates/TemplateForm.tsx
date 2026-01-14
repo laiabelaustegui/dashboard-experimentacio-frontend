@@ -4,14 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
-  ButtonGroup,
+  Card,
   Field,
   Fieldset,
+  Flex,
+  IconButton,
   Input,
   Stack,
   Text,
   Textarea,
 } from "@chakra-ui/react";
+import { LuX } from "react-icons/lu";
 
 import apiProvider, { ApiError } from "@/providers/api";
 import { toaster } from "@/components/ui/toaster";
@@ -19,14 +22,16 @@ import type { CreatePromptTemplateDto, CreateFeatureDto, PromptTemplate } from "
 
 interface TemplateFormProps {
   initialData?: PromptTemplate;
+  templateId?: number; // ID del template si estamos en modo edición
 }
 
-export function TemplateForm({ initialData }: TemplateFormProps) {
+export function TemplateForm({ initialData, templateId }: TemplateFormProps) {
   const [schemaJson, setSchemaJson] = useState(initialData ? JSON.stringify(initialData.system_prompt.schema, null, 2) : "");
   const router = useRouter();
+  const isEditMode = !!templateId;
 
   const [features, setFeatures] = useState<CreateFeatureDto[]>(initialData?.user_prompt.features || initialData?.user_prompt.features || []);
-  const [newFeature, setNewFeature] = useState<CreateFeatureDto>({ name: "", description: "" });
+  const [newFeature, setNewFeature] = useState<CreateFeatureDto>({ name: "" });
   const [name, setName] = useState(initialData?.name || "");
   const [systemPrompt, setSystemPrompt] = useState(initialData?.system_prompt.text || "");
   const [userPrompt, setUserPrompt] = useState(initialData?.user_prompt.text || "");
@@ -73,213 +78,295 @@ export function TemplateForm({ initialData }: TemplateFormProps) {
     };
 
     try {
-      await apiProvider.post({
-        path: "/prompt-templates/",
-        body: dto,
-      });
+      if (isEditMode && templateId) {
+        // Modo edición: usar PUT o PATCH
+        await apiProvider.put({
+          path: `/prompt-templates/${templateId}/`,
+          body: dto,
+        });
 
-      toaster.create({
-        title: "Template created",
-        description: "The prompt template has been successfully created.",
-        type: "success",
-        duration: 3000,
-      });
+        toaster.create({
+          title: "Template updated",
+          description: "The prompt template has been successfully updated.",
+          type: "success",
+          duration: 3000,
+        });
+        
+        router.push("/prompt-templates");
+      } else {
+        // Modo creación: usar POST
+        const createdTemplate = await apiProvider.post<PromptTemplate>({
+          path: "/prompt-templates/",
+          body: dto,
+        });
 
-      router.push("/prompt-templates");
+        toaster.create({
+          title: "Template created",
+          description: "The prompt template has been successfully created.",
+          type: "success",
+          duration: 3000,
+        });
+        
+        // Redirigir a la página de detalles del template creado
+        router.push(`/prompt-templates/${createdTemplate.id}`);
+      }
     } catch (error) {
       if (error instanceof ApiError) {
         toaster.create({
-          title: "Error creating template",
+          title: isEditMode ? "Error updating template" : "Error creating template",
           description: error.message,
           type: "error",
           duration: 5000,
         });
       } else {
         toaster.create({
-          title: "Error creating template",
+          title: isEditMode ? "Error updating template" : "Error creating template",
           description: "An unexpected error occurred. Please try again.",
           type: "error",
           duration: 5000,
         });
       }
-      console.error("Error creating template:", error);
+      console.error(isEditMode ? "Error updating template:" : "Error creating template:", error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Stack gap={6} maxW="2xl">
-        {/* Template details */}
-        <Fieldset.Root size="lg">
-          <Stack mb={2}>
-            <Fieldset.Legend>Template Details</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Provide a name for the prompt template.
-            </Fieldset.HelperText>
-          </Stack>
-
-          <Fieldset.Content>
-            <Field.Root>
-              <Field.Label>Name</Field.Label>
-              <Input 
-                name="name" 
-                placeholder="Template name" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </Field.Root>
-          </Fieldset.Content>
-        </Fieldset.Root>
-
-        {/* System prompt */}
-        <Fieldset.Root size="lg">
-          <Stack mb={2}>
-            <Fieldset.Legend>System Prompt</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Define the system prompt and its JSON schema.
-            </Fieldset.HelperText>
-          </Stack>
-
-          <Fieldset.Content>
-            <Stack gap={4}>
-              <Field.Root>
-                <Field.Label>System Prompt Text</Field.Label>
-                <Textarea
-                  name="systemPrompt"
-                  placeholder="System prompt text"
-                  rows={5}
-                  value={systemPrompt}
-                  onChange={(e) => setSystemPrompt(e.target.value)}
-                />
-              </Field.Root>
-
-              <Field.Root>
-                <Field.Label>Schema (JSON)</Field.Label>
-                <Input
-                  type="file"
-                  accept=".json,application/json"
-                  onChange={handleSchemaFileChange}
-                />
-
-                <Textarea
-                  name="systemSchema"
-                  rows={8}
-                  value={schemaJson}
-                  onChange={(e) => setSchemaJson(e.target.value)}
-                />
-              </Field.Root>
-            </Stack>
-          </Fieldset.Content>
-        </Fieldset.Root>
-
-        {/* User prompt */}
-        <Fieldset.Root size="lg">
-          <Stack mb={2}>
-            <Fieldset.Legend>User Prompt</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Define the user prompt text and the features for the template.
-            </Fieldset.HelperText>
-          </Stack>
-
-          <Fieldset.Content>
-            <Field.Root>
-              <Field.Label>User Prompt Text</Field.Label>
-              <Textarea
-                name="userPrompt"
-                placeholder="Recommend {{ k }} apps for {{ feature }}."
-                rows={3}
-                value={userPrompt}
-                onChange={(e) => setUserPrompt(e.target.value)}
-              />
-            </Field.Root>
-            {/* k opcional */}
-            <Field.Root>
-              <Field.Label>k (optional)</Field.Label>
-              <Input
-                name="k"
-                type="number"
-                placeholder="Number of apps to recommend"
-                value={kValue}
-                onChange={(e) => setKValue(e.target.value)}
-              />
-            </Field.Root>
-
-            {/* Features */}
-            <Field.Root>
-              <Field.Label>Features</Field.Label>
-              <Stack gap={2}>
-                <Input
-                  placeholder="Feature name (e.g. Build photo collages)"
-                  value={newFeature.name}
-                  onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
-                />
-                <Input
-                  placeholder="Feature description (optional)"
-                  value={newFeature.description || ""}
-                  onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
-                />
-                <Button
-                  type="button"
-                  alignSelf="flex-start"
-                  onClick={() => {
-                    if (!newFeature.name.trim()) return;
-                    setFeatures((prev) => [...prev, { 
-                      name: newFeature.name.trim(), 
-                      description: newFeature.description?.trim() || undefined 
-                    }]);
-                    setNewFeature({ name: "", description: "" });
-                  }}
-                >
-                  Add
-                </Button>
+    <Card.Root
+      asChild
+      maxW="5xl"
+      mt={8}
+      variant="elevated"
+    >
+      <form onSubmit={handleSubmit}>
+        <Card.Header>
+          <Card.Title fontSize="2xl">
+            {isEditMode ? "Edit Prompt Template" : "Create New Prompt Template"}
+          </Card.Title>
+          <Card.Description mt={2} color="fg.muted">
+            {isEditMode 
+              ? "Modify the template details below." 
+              : "Please complete the following information to create a new prompt template."}
+          </Card.Description>
+        </Card.Header>
+        
+        <Card.Body>
+          <Stack gap={8}>
+            {/* Template details */}
+            <Fieldset.Root size="lg" colorPalette="teal">
+              <Stack gap={4}>
+                <Fieldset.Legend fontSize="lg" fontWeight="semibold">Template Details</Fieldset.Legend>
+                <Fieldset.HelperText color="fg.muted">
+                  Provide a name for the prompt template.
+                </Fieldset.HelperText>
               </Stack>
-              {/* Lista de features añadidas */}
-              <Stack mt={2}>
-                {features.map((feat, idx) => (
-                  <Stack
-                    key={`${feat.name}-${idx}`}
-                    direction="row"
-                    justify="space-between"
-                    align="center"
-                    p={2}
-                    borderWidth="1px"
-                    borderRadius="md"
-                  >
-                    <Stack gap={0}>
-                      <Text fontWeight="semibold">{feat.name}</Text>
-                      {feat.description && (
-                        <Text textStyle="sm" color="fg.muted">
-                          {feat.description}
-                        </Text>
-                      )}
-                    </Stack>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      onClick={() =>
-                        setFeatures((prev) => prev.filter((_, i) => i !== idx))
+
+              <Fieldset.Content mt={6}>
+                <Field.Root>
+                  <Field.Label fontWeight="medium">Name</Field.Label>
+                  <Input 
+                    name="name" 
+                    placeholder="Enter template name" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    size="md"
+                    required
+                  />
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
+
+            {/* System prompt */}
+            <Fieldset.Root size="lg" colorPalette="teal">
+              <Stack gap={4}>
+                <Fieldset.Legend fontSize="lg" fontWeight="semibold">System Prompt</Fieldset.Legend>
+                <Fieldset.HelperText color="fg.muted">
+                  Define the system prompt and its JSON schema.
+                </Fieldset.HelperText>
+              </Stack>
+
+              <Fieldset.Content mt={6}>
+                <Stack gap={4}>
+                  <Field.Root>
+                    <Field.Label fontWeight="medium">System Prompt Text</Field.Label>
+                    <Field.HelperText mt={1} mb={2}>
+                      Define how the AI should behave
+                    </Field.HelperText>
+                    <Textarea
+                      name="systemPrompt"
+                      placeholder="You are a helpful assistant..."
+                      rows={5}
+                      value={systemPrompt}
+                      onChange={(e) => setSystemPrompt(e.target.value)}
+                      size="md"
+                      required
+                    />
+                  </Field.Root>
+
+                  <Field.Root>
+                    <Field.Label fontWeight="medium">Schema (JSON)</Field.Label>
+                    <Field.HelperText mt={1} mb={2}>
+                      Upload a JSON file or paste the schema directly
+                    </Field.HelperText>
+                    <Input
+                      type="file"
+                      accept=".json,application/json"
+                      onChange={handleSchemaFileChange}
+                      size="md"
+                      mb={2}
+                    />
+
+                    <Textarea
+                      name="systemSchema"
+                      rows={8}
+                      value={schemaJson}
+                      onChange={(e) => setSchemaJson(e.target.value)}
+                      placeholder='{\n  "type": "object",\n  "properties": {}\n}'
+                      fontFamily="mono"
+                      fontSize="sm"
+                      size="md"
+                      required
+                    />
+                  </Field.Root>
+                </Stack>
+              </Fieldset.Content>
+            </Fieldset.Root>
+
+            {/* User prompt */}
+            <Fieldset.Root size="lg" colorPalette="teal">
+              <Stack gap={4}>
+                <Fieldset.Legend fontSize="lg" fontWeight="semibold">User Prompt</Fieldset.Legend>
+                <Fieldset.HelperText color="fg.muted">
+                  Define the user prompt text and the features for the template.
+                </Fieldset.HelperText>
+              </Stack>
+
+              <Fieldset.Content mt={6}>
+                <Field.Root>
+                  <Field.Label fontWeight="medium">User Prompt Text</Field.Label>
+                  <Field.HelperText mt={1} mb={2}>
+                    Use placeholders like {"{{ k }}"} and {"{{ feature }}"}
+                  </Field.HelperText>
+                  <Textarea
+                    name="userPrompt"
+                    placeholder="Recommend {{ k }} apps for {{ feature }}."
+                    rows={3}
+                    value={userPrompt}
+                    onChange={(e) => setUserPrompt(e.target.value)}
+                    size="md"
+                    required
+                  />
+                </Field.Root>
+                {/* k opcional */}
+                <Field.Root>
+                  <Field.Label fontWeight="medium">k (optional)</Field.Label>
+                  <Field.HelperText mt={1} mb={2}>
+                    Number of items to recommend (minimum: 1)
+                  </Field.HelperText>
+                  <Input
+                    name="k"
+                    type="number"
+                    placeholder="e.g. 5"
+                    value={kValue}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Permitir vacío o valores >= 1
+                      if (value === '' || (Number(value) >= 1 && !value.includes('-'))) {
+                        setKValue(value);
                       }
-                    >
-                      Remove
-                    </Button>
-                  </Stack>
-                ))}
-              </Stack>
-            </Field.Root>
-          </Fieldset.Content>
-        </Fieldset.Root>
+                    }}
+                    size="md"
+                    min={1}
+                  />
+                </Field.Root>
 
-        <Stack alignSelf="flex-start">
-          <ButtonGroup gap={4}>
-            <Button type="submit" colorPalette="teal">
-              Submit
-            </Button>
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </ButtonGroup>
-        </Stack>
-      </Stack>
-    </form>
+                {/* Features */}
+                <Field.Root>
+                  <Field.Label fontWeight="medium">Features</Field.Label>
+                  <Field.HelperText mt={1} mb={3}>
+                    Add features that will be used in the user prompt
+                  </Field.HelperText>
+                  
+                  {/* Lista de features añadidas */}
+                  {features.length > 0 && (
+                    <Stack gap={3} mb={3}>
+                      {features.map((feat, idx) => (
+                        <Card.Root
+                          key={`${feat.name}-${idx}`}
+                          size="sm"
+                          variant="subtle"
+                          borderWidth="1px"
+                          borderColor="teal.500/20"
+                        >
+                          <Card.Body py={3}>
+                            <Flex justify="space-between" align="center" gap={4}>
+                              <Text fontWeight="semibold" fontSize="sm" flex="1">
+                                {feat.name}
+                              </Text>
+                              <IconButton
+                                aria-label="Remove feature"
+                                size="sm"
+                                variant="ghost"
+                                colorPalette="red"
+                                onClick={() =>
+                                  setFeatures((prev) => prev.filter((_, i) => i !== idx))
+                                }
+                              >
+                                <LuX />
+                              </IconButton>
+                            </Flex>
+                          </Card.Body>
+                        </Card.Root>
+                      ))}
+                    </Stack>
+                  )}
+
+                  <Input
+                    placeholder="Enter feature name (e.g. Build photo collages)"
+                    value={newFeature.name}
+                    onChange={(e) => setNewFeature({ name: e.target.value })}
+                    size="md"
+                    mb={2}
+                  />
+                  <Button
+                    type="button"
+                    alignSelf="flex-start"
+                    colorPalette="teal"
+                    variant="outline"
+                    size="md"
+                    onClick={() => {
+                      if (!newFeature.name.trim()) return;
+                      setFeatures((prev) => [...prev, { 
+                        name: newFeature.name.trim()
+                      }]);
+                      setNewFeature({ name: "" });
+                    }}
+                  >
+                    Add Feature
+                  </Button>
+                </Field.Root>
+              </Fieldset.Content>
+            </Fieldset.Root>
+          </Stack>
+        </Card.Body>
+
+        <Card.Footer justifyContent="flex-end" gap={3}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="lg"
+            onClick={handleCancel}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            colorPalette="teal"
+            size="lg"
+          >
+            {isEditMode ? "Update Template" : "Create Template"}
+          </Button>
+        </Card.Footer>
+      </form>
+    </Card.Root>
   );
 }

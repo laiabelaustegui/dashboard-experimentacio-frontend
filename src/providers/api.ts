@@ -107,6 +107,25 @@ class ApiProvider {
         }
     }
 
+    public async put<T, D>({
+        body = undefined,
+        path,
+        options = {},
+    }: {
+        body?: D;
+        options?: AxiosRequestConfig<D>;
+        path: string;
+    }): Promise<T> {
+        try {
+            const response = await this.axiosInstance.put<T>(path, body, {
+                ...options,
+            });
+            return response.data;
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
     public async delete<T>(
         path: string,
         options: AxiosRequestConfig = {}

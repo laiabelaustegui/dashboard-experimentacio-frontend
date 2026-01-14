@@ -22,25 +22,51 @@ import ChartConfigModal from "./charts/ChartConfigModal";
 export default function ExperimentDetails({ id }: { id: number }) {
   const { experiment, isLoading, isError, error } = useExperiment(id);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+  const [selectedFeatureName, setSelectedFeatureName] = useState<string | null>(null);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const creationDate = experiment?.execution_date.slice(0, 10);
   const runs = experiment?.runs ?? [];
 
-  // colección para Select (usa directamente el array de runs)
+  // Get unique features from runs
+  const uniqueFeatures = useMemo(() => {
+    const featureNames = Array.from(
+      new Set(runs.map((run) => run.feature.name))
+    ).sort();
+    return featureNames;
+  }, [runs]);
+
+  // Filter runs by selected feature
+  const filteredRuns = useMemo(() => {
+    if (!selectedFeatureName) return runs;
+    return runs.filter((run) => run.feature.name === selectedFeatureName);
+  }, [runs, selectedFeatureName]);
+
+  // Collection for features selector
+  const featuresCollection = useMemo(
+    () =>
+      createListCollection({
+        items: uniqueFeatures.map(name => ({ name })),
+        itemToString: (item) => item.name,
+        itemToValue: (item) => item.name,
+      }),
+    [uniqueFeatures],
+  );
+
+  // colección para Select (usa directamente el array de runs filtradas)
   const collection = useMemo(
     () =>
       createListCollection({
-        items: runs,
+        items: filteredRuns,
         itemToString: (run) => `Run (id: ${run.id})`,
         itemToValue: (run) => String(run.id),
       }),
-    [runs],
+    [filteredRuns],
   );
 
   const currentRun =
-    runs.find((r) => String(r.id) === selectedRunId) ?? runs[0] ?? null;
+    filteredRuns.find((r) => String(r.id) === selectedRunId) ?? filteredRuns[0] ?? null;
 
   // Export functions
   const exportAsJSON = () => {
@@ -219,46 +245,94 @@ export default function ExperimentDetails({ id }: { id: number }) {
         </Card.Root>
       </Flex>
 
-      {/* selector de run con Select + createListCollection */}
+      {/* selector de feature y run con Select + createListCollection */}
       {runs.length > 0 && (
-        <Box mt={4}>
-          <Text mb={1} fontWeight="medium">
-            Select run
-          </Text>
+        <Flex gap={4} mt={4} wrap="wrap">
+          {/* Feature selector */}
+          <Box flex="1" minW="250px">
+            <Text mb={1} fontWeight="medium">
+              Filter by feature
+            </Text>
 
-          <Select.Root
-            collection={collection}
-            value={currentRun ? [String(currentRun.id)] : []}
-            onValueChange={(details) => {
-              const v = details.value[0];
-              setSelectedRunId(v ?? null);
-            }}
-            size="sm"
-            width="320px"
-          >
-            <Select.HiddenSelect />
-            <Select.Control>
-              <Select.Trigger>
-                <Select.ValueText placeholder="Select run" />
-              </Select.Trigger>
-              <Select.IndicatorGroup>
-                <Select.Indicator />
-                <Select.ClearTrigger />
-              </Select.IndicatorGroup>
-            </Select.Control>
+            <Select.Root
+              collection={featuresCollection}
+              value={selectedFeatureName ? [selectedFeatureName] : []}
+              onValueChange={(details) => {
+                const v = details.value[0];
+                setSelectedFeatureName(v ?? null);
+                // Reset selected run when feature changes
+                setSelectedRunId(null);
+              }}
+              size="sm"
+            >
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger>
+                  <Select.ValueText placeholder="All features" />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                  <Select.ClearTrigger />
+                </Select.IndicatorGroup>
+              </Select.Control>
 
-            <Select.Positioner>
-              <Select.Content>
-                {collection.items.map((run) => (
-                  <Select.Item key={run.id} item={run}>
-                    Run #{runs.findIndex((r) => r.id === run.id) + 1} (id: {run.id})
-                    <Select.ItemIndicator />
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Positioner>
-          </Select.Root>
-        </Box>
+              <Select.Positioner>
+                <Select.Content>
+                  {featuresCollection.items.map((item) => (
+                    <Select.Item key={item.name} item={item}>
+                      {item.name}
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Positioner>
+            </Select.Root>
+          </Box>
+
+          {/* Run selector */}
+          <Box flex="1" minW="250px">
+            <Text mb={1} fontWeight="medium">
+              Select run
+              {selectedFeatureName && (
+                <Text as="span" color="fg.muted" fontSize="sm" ml={2}>
+                  ({filteredRuns.length} run{filteredRuns.length !== 1 ? 's' : ''})
+                </Text>
+              )}
+            </Text>
+
+            <Select.Root
+              collection={collection}
+              value={currentRun ? [String(currentRun.id)] : []}
+              onValueChange={(details) => {
+                const v = details.value[0];
+                setSelectedRunId(v ?? null);
+              }}
+              size="sm"
+            >
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger>
+                  <Select.ValueText placeholder="Select run" />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                  <Select.ClearTrigger />
+                </Select.IndicatorGroup>
+              </Select.Control>
+
+              <Select.Positioner>
+                <Select.Content>
+                  {collection.items.map((run) => (
+                    <Select.Item key={run.id} item={run}>
+                      Run #{filteredRuns.findIndex((r) => r.id === run.id) + 1} (id: {run.id})
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Positioner>
+            </Select.Root>
+          </Box>
+        </Flex>
       )}
 
       {currentRun && (
@@ -293,6 +367,15 @@ export default function ExperimentDetails({ id }: { id: number }) {
                 <Text fontWeight="semibold">{currentRun.configured_model.short_name}</Text>
               </Card.Body>
             </Card.Root>
+
+            <Card.Root flex="1" minW="200px">
+              <Card.Body>
+                <Text textStyle="sm" color="fg.muted">
+                  Feature executed
+                </Text>
+                <Text fontWeight="semibold">{currentRun.feature.name}</Text>
+              </Card.Body>
+            </Card.Root>
             </Flex>
 
             {/* Mobile app rankings */}
@@ -301,7 +384,7 @@ export default function ExperimentDetails({ id }: { id: number }) {
                 Mobile app rankings
             </Heading>
             <Text fontSize="sm" color="fg.muted" mb={4}>
-                Results generated by {currentRun.configured_model.short_name} for Run #{runs.findIndex((r) => r.id === currentRun.id) + 1}
+                Results generated by {currentRun.configured_model.short_name} for Run #{filteredRuns.findIndex((r) => r.id === currentRun.id) + 1}
             </Text>
             <Stack gap={3}>
                 {currentRun.mobile_app_rankings.map((item, index) => (

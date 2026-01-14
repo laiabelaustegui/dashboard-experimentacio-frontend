@@ -14,8 +14,6 @@ import { useState, useMemo } from "react";
 
 type ChartType = "heatmap" | "line";
 type HeatmapType = "frequency" | "jaccard";
-type SelectionMode = "runs" | "feature";
-
 interface ChartConfigModalProps {
   open: boolean;
   onClose: () => void;
@@ -32,7 +30,6 @@ export default function ChartConfigModal({
   const router = useRouter();
   const [chartType, setChartType] = useState<ChartType>("heatmap");
   const [heatmapType, setHeatmapType] = useState<HeatmapType>("frequency");
-  const [selectionMode, setSelectionMode] = useState<SelectionMode>("feature");
   const [selectedRuns, setSelectedRuns] = useState<string[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
 
@@ -47,13 +44,6 @@ export default function ChartConfigModal({
     items: [
       { value: "frequency", label: "Frequency Heatmap" },
       { value: "jaccard", label: "Jaccard Similarity (Internal Consistency)" },
-    ],
-  });
-
-  const selectionModeCollection = createListCollection({
-    items: [
-      { value: "runs", label: "Select by Runs" },
-      { value: "feature", label: "Select by Feature" },
     ],
   });
 
@@ -78,14 +68,8 @@ export default function ChartConfigModal({
   const handleGenerate = () => {
     let runsToUse = selectedRuns;
 
-    // If jaccard heatmap, use all runs from selected features
-    if (heatmapType === "jaccard" && selectedFeatures.length > 0) {
-      runsToUse = runs
-        .filter((run) => selectedFeatures.includes(run.feature.name))
-        .map((run) => String(run.id));
-    }
-    // If feature mode, get all runs with the selected features
-    else if (selectionMode === "feature" && selectedFeatures.length > 0) {
+    // If heatmap with features selected, get all runs with the selected features
+    if (chartType === "heatmap" && selectedFeatures.length > 0) {
       runsToUse = runs
         .filter((run) => selectedFeatures.includes(run.feature.name))
         .map((run) => String(run.id));
@@ -201,47 +185,8 @@ export default function ChartConfigModal({
               </Flex>
             )}
 
-            {/* Selection Mode - shown only for frequency heatmap (jaccard always uses feature mode) */}
-            {chartType === "heatmap" && heatmapType === "frequency" && (
-              <Flex direction="column" gap={2}>
-                <Text fontWeight="medium">Selection Mode</Text>
-                <Select.Root
-                  collection={selectionModeCollection}
-                  value={[selectionMode]}
-                  onValueChange={(details) => {
-                    setSelectionMode(details.value[0] as SelectionMode);
-                    // Reset selections when changing mode
-                    setSelectedRuns([]);
-                    setSelectedFeatures([]);
-                  }}
-                  size="sm"
-                >
-                  <Select.HiddenSelect />
-                  <Select.Control>
-                    <Select.Trigger>
-                      <Select.ValueText placeholder="Select mode" />
-                    </Select.Trigger>
-                    <Select.IndicatorGroup>
-                      <Select.Indicator />
-                    </Select.IndicatorGroup>
-                  </Select.Control>
-
-                  <Select.Positioner>
-                    <Select.Content>
-                      {selectionModeCollection.items.map((item) => (
-                        <Select.Item key={item.value} item={item}>
-                          {item.label}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Positioner>
-                </Select.Root>
-              </Flex>
-            )}
-
-            {/* Feature Selection - shown when selection mode is feature or for jaccard heatmap */}
-            {chartType === "heatmap" && (heatmapType === "jaccard" || (heatmapType === "frequency" && selectionMode === "feature")) && (
+            {/* Feature Selection - shown for any heatmap type */}
+            {chartType === "heatmap" && (
               <Flex direction="column" gap={2}>
                 {heatmapType === "jaccard" && (
                   <Flex justify="space-between" align="center">
@@ -299,8 +244,8 @@ export default function ChartConfigModal({
               </Flex>
             )}
 
-            {/* Runs Selection - shown for line chart or when not using feature mode for heatmap */}
-            {(chartType === "line" || !(chartType === "heatmap" && (heatmapType === "jaccard" || (heatmapType === "frequency" && selectionMode === "feature")))) && (
+            {/* Runs Selection - shown only for line chart */}
+            {chartType === "line" && (
             <Flex direction="column" gap={2}>
               <Flex justify="space-between" align="center">
                 <Text fontWeight="medium">Select Runs</Text>
@@ -371,12 +316,7 @@ export default function ChartConfigModal({
             colorPalette="teal"
             onClick={handleGenerate}
             disabled={
-              chartType === "line" ? selectedRuns.length === 0 : (
-                heatmapType === "jaccard" ? selectedFeatures.length === 0 : (
-                  (selectionMode === "runs" && selectedRuns.length === 0) ||
-                  (selectionMode === "feature" && selectedFeatures.length === 0)
-                )
-              )
+              chartType === "line" ? selectedRuns.length === 0 : selectedFeatures.length === 0
             }
           >
             Generate Chart

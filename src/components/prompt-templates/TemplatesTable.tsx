@@ -10,6 +10,7 @@ import {
   Button,
   Dialog,
 } from "@chakra-ui/react";
+import { Tooltip } from "@/components/ui/tooltip";
 import { IoPencil, IoTrash, IoCopy } from "react-icons/io5";
 import { usePromptTemplates } from "./usePromptTemplates";
 import { useRouter } from "next/navigation";
@@ -50,6 +51,16 @@ export const TemplatesTable = () => {
     } else {
       // Si no tiene experimentos, borrar directamente
       deleteTemplate(templateId);
+    }
+  };
+
+  const handleEditClick = (e: React.MouseEvent, templateId: number) => {
+    e.stopPropagation();
+    const template = getTemplate(templateId);
+    
+    // Solo permitir editar si no tiene experimentos asociados
+    if (template && (!template.experiments_count || template.experiments_count === 0)) {
+      router.push(`/prompt-templates/${templateId}/edit`);
     }
   };
 
@@ -141,17 +152,23 @@ export const TemplatesTable = () => {
                   {new Date(template.creation_date).toLocaleDateString()}
                 </Table.Cell>
                 <Table.Cell textAlign="end">
-                  <IconButton 
-                    aria-label="Edit" 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/prompt-templates/${template.id}`);
-                    }}
+                  <Tooltip
+                    content={
+                      template.experiments_count && template.experiments_count > 0
+                        ? `Cannot edit: this template is used by ${template.experiments_count} experiment(s)`
+                        : "Edit template"
+                    }
                   >
-                    <IoPencil />
-                  </IconButton>
+                    <IconButton 
+                      aria-label="Edit" 
+                      size="sm" 
+                      variant="ghost"
+                      disabled={template.experiments_count ? template.experiments_count > 0 : false}
+                      onClick={(e) => handleEditClick(e, template.id)}
+                    >
+                      <IoPencil />
+                    </IconButton>
+                  </Tooltip>
                   <IconButton 
                     aria-label="Duplicate" 
                     size="sm" 
